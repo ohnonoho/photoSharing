@@ -3,17 +3,15 @@
     package="com.example.photosharing" >
 
     <uses-permission
-        android:required="true"
-        android:name="android.permission.ACCESS_WIFI_STATE" />
-
+        android:name="android.permission.ACCESS_WIFI_STATE"
+        android:required="true" />
     <uses-permission
-        android:required="true"
-        android:name="ANDROID.PERMISSION.CHANGE_WIFI_STATE" />
-
+        android:name="ANDROID.PERMISSION.CHANGE_WIFI_STATE"
+        android:required="true" />
     <uses-permission
-        android:required="true"
-        android:name="ANDROID.PERMISSION.INTERNET" />
-    
+        android:name="ANDROID.PERMISSION.INTERNET"
+        android:required="true" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -27,6 +25,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".ProducerActivity"
+            android:label="@string/title_activity_producer" >
         </activity>
     </application>
 
