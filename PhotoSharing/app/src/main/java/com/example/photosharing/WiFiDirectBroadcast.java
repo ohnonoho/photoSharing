@@ -3,6 +3,7 @@ package com.example.photosharing;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 
@@ -28,19 +29,22 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
         super();
         this.mManager = manager;
         this.mChannel = channel;
-        this.mProducerActivity = mProducerActivity;
+        this.mProducerActivity = activity;
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
         String action = intent.getAction();
+        Log.d(ProducerActivity.TAG, action);
         if(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             // Determine if wifi p2p model is enable or not, alert the Activity
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
             if(state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
+                Log.d(ProducerActivity.TAG, "WiFi P2P Enabled");
                 mProducerActivity.setIsWifiP2pEnabled(true);
             } else {
+                Log.d(ProducerActivity.TAG, "WiFi P2P Not Enabled");
                 mProducerActivity.setIsWifiP2pEnabled(false);
             }
 
@@ -57,6 +61,7 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
         } else if(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             ProducerActivityFragment fragment = (ProducerActivityFragment)
                     mProducerActivity.getFragmentManager().findFragmentById(R.id.producer_fragment);
+            fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));
         }
     }
 

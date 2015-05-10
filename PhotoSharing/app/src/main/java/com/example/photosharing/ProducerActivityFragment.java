@@ -48,6 +48,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         peers.clear();
         peers.addAll(peerList.getDeviceList());
 
+        Log.d(ProducerActivity.TAG, peerList.toString());
+
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
         if (peers.size() == 0) {
             Log.d(ProducerActivity.TAG, "No devices found");
@@ -134,9 +136,9 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     public void updateThisDevice(WifiP2pDevice device) {
         this.device = device;
         TextView top = (TextView) mView.findViewById(R.id.producer_name);
-        top.setText(device.deviceName);
+        top.setText("This device is: " + device.deviceName);
         TextView bottom = (TextView) mView.findViewById(R.id.producer_status);
-        bottom.setText(getDeviceStatus(device.status));
+        bottom.setText("This device's status is: " + getDeviceStatus(device.status));
     }
 
     public interface ProducerActionListener {

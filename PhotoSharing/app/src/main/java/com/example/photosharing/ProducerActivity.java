@@ -50,18 +50,18 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
         Log.d(this.TAG, "Start to discover peers");
 
         //
-        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-
-            @Override
-            public void onSuccess() {
-                Toast.makeText(ProducerActivity.this, "Discovery Initiated", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                Toast.makeText(ProducerActivity.this, "Discovery Failed" + reason, Toast.LENGTH_SHORT).show();
-            }
-        });
+//        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+//
+//            @Override
+//            public void onSuccess() {
+//                Toast.makeText(ProducerActivity.this, "Discovery Initiated", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onFailure(int reason) {
+//                Toast.makeText(ProducerActivity.this, "Discovery Failed" + reason, Toast.LENGTH_SHORT).show();
+//            }
+//        });
 
     }
 
@@ -92,6 +92,19 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     protected void onResume() {
         super.onResume();
         registerReceiver(mReceiver, intentFilter);
+
+        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+
+            @Override
+            public void onSuccess() {
+                Toast.makeText(ProducerActivity.this, "Discovery Initiated", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Toast.makeText(ProducerActivity.this, "Discovery Failed" + reason, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

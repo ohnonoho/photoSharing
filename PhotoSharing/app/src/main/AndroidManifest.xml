@@ -19,7 +19,14 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".ProducerActivity"
-            android:label="@string/title_activity_producer" >
+            android:label="@string/title_activity_producer"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action
+                    android:name="android.intent.action.MAIN" />
+                <category
+                    android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 
