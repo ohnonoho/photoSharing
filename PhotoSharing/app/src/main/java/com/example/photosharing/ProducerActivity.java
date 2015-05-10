@@ -1,20 +1,30 @@
 package com.example.photosharing;
 
 import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 
-public class ProducerActivity extends ActionBarActivity {
+public class ProducerActivity extends ActionBarActivity implements ProducerActivityFragment.ProducerActionListener{
+
+    public static final String TAG = "Producer Activity";
 
     private final IntentFilter intentFilter = new IntentFilter();
     private WifiP2pManager.Channel mChannel;
     private WifiP2pManager mManager;
     private WiFiDirectBroadcast mReceiver;
+
+    private boolean isWifiP2pEnabled = false;
+
+    public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
+        this.isWifiP2pEnabled = isWifiP2pEnabled;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,12 +40,14 @@ public class ProducerActivity extends ActionBarActivity {
         // Indicate the state of Wi-Fi P2P connectivity has changed
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
 
-        // Indeicate this device's details have changed
+        // Indicate this device's details have changed
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
         mManager = (WifiP2pManager) getSystemService(this.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
         mReceiver = new WiFiDirectBroadcast(mManager, mChannel, this);
+
+        Log.d(this.TAG, "Start to discover peers");
 
         //
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
@@ -88,5 +100,18 @@ public class ProducerActivity extends ActionBarActivity {
         unregisterReceiver(mReceiver);
     }
 
+    @Override
+    public void connect(WifiP2pConfig config) {
+        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
 
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Toast.makeText(ProducerActivity.this, "Connect failed.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 }
