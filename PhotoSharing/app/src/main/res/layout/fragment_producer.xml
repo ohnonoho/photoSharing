@@ -27,13 +27,13 @@
             android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/produce_content"
+            android:id="@+id/produce_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/button_produce"/>
 
         <Button
-            android:id="@+id/require_content"
+            android:id="@+id/require_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/button_require"/>

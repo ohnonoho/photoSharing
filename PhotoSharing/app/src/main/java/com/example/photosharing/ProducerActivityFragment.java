@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +47,14 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         mView = inflater.inflate(R.layout.fragment_producer, container, false);
 
         this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.list_item, peers));
+
+        Button btnProduce = (Button) mView.findViewById(R.id.produce_button);
+        btnProduce.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                
+            }
+        });
         return mView;
     }
 
