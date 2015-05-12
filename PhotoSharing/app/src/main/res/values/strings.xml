@@ -3,4 +3,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_producer">ProducerActivity</string>
+    <string name="button_produce">Produce</string>
+    <string name="button_require">Require</string>
 </resources>

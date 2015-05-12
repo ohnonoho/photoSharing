@@ -21,6 +21,12 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.named_data.jndn.Data;
+import net.named_data.jndn.Face;
+import net.named_data.jndn.Interest;
+import net.named_data.jndn.Name;
+import net.named_data.jndn.OnData;
+import net.named_data.jndn.OnTimeout;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -126,7 +132,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 TextView top = (TextView) v.findViewById(R.id.device_name);
                 TextView bottom = (TextView) v.findViewById(R.id.device_status);
 
-                top.setText(device.deviceName);
+                top.setText("My name is " + device.deviceName + " and my address is " + device.deviceAddress);
                 bottom.setText(getDeviceStatus(device.status));
             }
             return v;
@@ -136,7 +142,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     public void updateThisDevice(WifiP2pDevice device) {
         this.device = device;
         TextView top = (TextView) mView.findViewById(R.id.producer_name);
-        top.setText("This device is: " + device.deviceName);
+        top.setText("This device is: " + device.deviceName + " and the address is " + device.deviceAddress);
         TextView bottom = (TextView) mView.findViewById(R.id.producer_status);
         bottom.setText("This device's status is: " + getDeviceStatus(device.status));
     }

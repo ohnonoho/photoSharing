@@ -25,6 +25,18 @@
             android:id="@+id/producer_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/produce_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_produce"/>
+
+        <Button
+            android:id="@+id/require_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_require"/>
     </LinearLayout>
 
 </RelativeLayout>
