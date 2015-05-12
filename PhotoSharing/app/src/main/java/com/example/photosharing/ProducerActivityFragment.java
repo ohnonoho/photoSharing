@@ -96,7 +96,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = device.deviceAddress;
         config.wps.setup = WpsInfo.PBC;
-        ((ProducerActionListener)getListAdapter()).connect(config);
+        ((ProducerActionListener)getActivity()).connect(config);
     }
 
     /**
