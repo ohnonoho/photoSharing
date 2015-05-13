@@ -7,6 +7,7 @@ import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -19,6 +20,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +30,17 @@ import net.named_data.jndn.Face;
 import net.named_data.jndn.Interest;
 import net.named_data.jndn.Name;
 import net.named_data.jndn.OnData;
+import net.named_data.jndn.OnInterest;
+import net.named_data.jndn.OnRegisterFailed;
 import net.named_data.jndn.OnTimeout;
+import net.named_data.jndn.security.KeyChain;
+import net.named_data.jndn.security.identity.IdentityManager;
+import net.named_data.jndn.security.identity.MemoryIdentityStorage;
+import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
+import net.named_data.jndn.transport.Transport;
+import net.named_data.jndn.util.Blob;
+
+import org.w3c.dom.Text;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -52,7 +65,17 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         btnProduce.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                
+                ProduceTask produceTask = new ProduceTask();
+                produceTask.execute();
+            }
+        });
+
+        Button btnRequire = (Button) mView.findViewById(R.id.require_button);
+        btnRequire.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RequestTask requestTask = new RequestTask();
+                requestTask.execute();
             }
         });
         return mView;
@@ -107,7 +130,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         super.onListItemClick(l, v, position, id);
 
         WifiP2pDevice device = (WifiP2pDevice) getListAdapter().getItem(position);
-        Toast.makeText(getActivity(), device.deviceName, Toast.LENGTH_SHORT);
+
         WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = device.deviceAddress;
         config.wps.setup = WpsInfo.PBC;
@@ -158,5 +181,117 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
     public interface ProducerActionListener {
         public void connect(WifiP2pConfig config);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class ProduceTask extends AsyncTask<Void, Void, Void> {
+
+        private Face mFace;
+
+        private static final String TAG = "Produce Task";
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                KeyChain keyChain = buildTestKeyChain();
+                mFace = new Face("localhost");
+                mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
+                mFace.registerPrefix(new Name("/test"),
+                        new OnInterest() {
+                            @Override
+                            public void onInterest(Name name, Interest interest, Transport transport, long l) {
+                                Data data = new Data(interest.getName());
+                                data.setContent(new Blob("This is the test data!"));
+                                try {
+                                    Log.i(ProduceTask.TAG, "The data has been send");
+                                    mFace.putData(data);
+                                } catch(IOException e) {
+                                    Log.e(ProduceTask.TAG, "Failed to send data");
+                                }
+                            }
+                        },
+                        new OnRegisterFailed() {
+                            @Override
+                            public void onRegisterFailed(Name name) {
+                                Log.e(ProduceTask.TAG, "Failed to register the data");
+                            }
+                        }
+                );
+
+                while(true) {
+                    mFace.processEvents();
+                }
+            } catch (Exception e){
+                Log.e(ProduceTask.TAG, e.toString());
+            }
+
+            return null;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class RequestTask extends AsyncTask<Void, Void, String> {
+
+        private static final String TAG = "Request Task";
+
+        private Face mFace;
+        private String receiveVal = "I have not received data";
+        private boolean shouldStop = false;
+        @Override
+        protected String doInBackground(Void... params) {
+
+            try {
+                mFace = new Face("localhost");
+                KeyChain keyChain = buildTestKeyChain();
+                mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
+
+                Log.i(RequestTask.TAG, "Send the request");
+
+                Interest interest = new Interest(new Name("/test"));
+                mFace.expressInterest(interest, new OnData() {
+                    @Override
+                    public void onData(Interest interest, Data data) {
+                        Log.i(RequestTask.TAG, "The data has been received");
+                        receiveVal = data.getContent().toString();
+                        shouldStop = true;
+                    }
+                }, new OnTimeout() {
+                    @Override
+                    public void onTimeout(Interest interest) {
+                        Log.e(RequestTask.TAG, "TimeOut!");
+                    }
+                });
+
+//                while(!shouldStop) {
+//                    // Log.i(RequestTask.TAG, "Requiring For the Data");
+//                    mFace.processEvents();
+//                }
+            } catch (Exception e) {
+                Log.e(RequestTask.TAG, e.toString());
+            }
+            return receiveVal;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            TextView view = (TextView)mView.findViewById(R.id.result_text);
+            view.setText(s);
+        }
+    }
+
+    public static KeyChain buildTestKeyChain() throws net.named_data.jndn.security.SecurityException {
+        MemoryIdentityStorage identityStorage = new MemoryIdentityStorage();
+        MemoryPrivateKeyStorage privateKeyStorage = new MemoryPrivateKeyStorage();
+        IdentityManager identityManager = new IdentityManager(identityStorage, privateKeyStorage);
+        KeyChain keyChain = new KeyChain(identityManager);
+        try {
+            keyChain.getDefaultCertificateName();
+        } catch (net.named_data.jndn.security.SecurityException e) {
+            keyChain.createIdentity(new Name("/test/identity"));
+            keyChain.getIdentityManager().setDefaultIdentity(new Name("/test/identity"));
+        }
+        return keyChain;
     }
 }
