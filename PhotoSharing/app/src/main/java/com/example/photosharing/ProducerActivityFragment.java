@@ -187,6 +187,13 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         ownerStatus.setText("Owner Status: " + isOwner);
     }
 
+    public void updateMyAddress(String addr) {
+//        TextView groupOwnerName = (TextView) mView.findViewById(R.id.group_owner_name);
+//        groupOwnerName.setText("Owner Name: " + name);
+        TextView myAddress = (TextView) mView.findViewById(R.id.my_address);
+        myAddress.setText("My Address: " + addr);
+    }
+
     public interface ProducerActionListener {
         public void connect(WifiP2pConfig config);
     }

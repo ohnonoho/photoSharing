@@ -12,13 +12,20 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
+
 import com.intel.jndn.management.NFD;
 
 import net.named_data.jndn.Face;
 import net.named_data.jndn.Name;
 
+
+import java.net.Inet4Address;
+
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -86,6 +93,43 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private byte[] getLocalIPAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        if (inetAddress instanceof Inet4Address) { // fix for Galaxy Nexus. IPv4 is easy to use :-)
+                            return inetAddress.getAddress();
+                        }
+                        //return inetAddress.getHostAddress().toString(); // Galaxy Nexus returns IPv6
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            Log.e("AndroidNetworkAddressFactory", "getLocalIPAddress()", ex);
+        } catch (NullPointerException ex) {
+            Log.e("AndroidNetworkAddressFactory", "getLocalIPAddress()", ex);
+        }
+        return null;
+    }
+
+    private String getDottedDecimalIP(byte[] ipAddr) {
+        //convert to dotted decimal notation:
+        String ipAddrStr = "";
+        for (int i=0; i<ipAddr.length; i++) {
+            if (i > 0) {
+                ipAddrStr += ".";
+            }
+            ipAddrStr += ipAddr[i]&0xFF;
+        }
+        return ipAddrStr;
+    }
+
+
+
+
     private class RequestOwner extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -101,14 +145,20 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         String oAddress = groupOwnerAddress.getHostAddress();
                         boolean isOwner = info.isGroupOwner;
                         // String name = groupOwnerAddress.getHostName();
+                        String localIP;
+                        if (!isOwner){
+                            localIP = getDottedDecimalIP(getLocalIPAddress());
+                            NFD.register(new Face("localhost"), "udp://" + oAddress, new Name("/test"), 1);
+                        }
+                        else {
+                            localIP = oAddress;
+                        }
                         Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
+                        Log.i(ProducerActivity.TAG, "My Address:" + localIP);
                         fragment.updateGroupOwner(isOwner, oAddress);
 
-                        // Register the prefix on the slaves NFD
-                        // The ip address now is hard code to see if we could register the prefix on NFD using the libaray
-                        if (isOwner == false) {
-                            NFD.register(new Face("localhost"), "udp://192.168.49.1", new Name("/test"), 1);
-                        }
+                        fragment.updateMyAddress(localIP);
+
                     } catch(Exception e) {
                         Log.e(ProducerActivity.TAG, e.toString());
                     }
