@@ -15,6 +15,7 @@ import android.util.Log;
 
 import com.intel.jndn.management.NFD;
 
+import net.named_data.jndn.ControlParameters;
 import net.named_data.jndn.Face;
 import net.named_data.jndn.Name;
 import net.named_data.jndn.security.KeyChain;
@@ -148,12 +149,24 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         String localIP;
                         if (!isOwner){
                             localIP = getDottedDecimalIP(getLocalIPAddress());
+                            NFD nfd= new NFD();
                             Face mFace = new Face("localhost");
                             KeyChain keyChain = ProducerActivityFragment.buildTestKeyChain();
                             mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
-                            NFD nfd = new NFD();
+                            int faceId = NFD.createFace(mFace, "udp://" + oAddress);
+
+                            //NFD nfd = new NFD();
                            // Face m2 = new Face();
-                            nfd.register(mFace, "udp://" + oAddress, new Name("/test"), 1);
+                            //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 1);
+                            NFD.register(mFace, faceId, new Name("/test"), 1);
+
+//                            NFD.register(mFace,
+//                                    new ControlParameters()
+//                                            .setName(new Name("/test"))
+//                                            .setFaceId(faceId)
+//                                            .setCost(1)
+//                                            .setForwardingFlags(flags));
+//                            //NFD.register();
 
                         }
                         else {
