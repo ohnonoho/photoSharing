@@ -17,6 +17,7 @@ import com.intel.jndn.management.NFD;
 
 import net.named_data.jndn.Face;
 import net.named_data.jndn.Name;
+import net.named_data.jndn.security.KeyChain;
 
 
 import java.net.Inet4Address;
@@ -148,6 +149,9 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         String localIP;
                         if (!isOwner){
                             localIP = getDottedDecimalIP(getLocalIPAddress());
+                            Face mFace = new Face("localhost");
+                            KeyChain keyChain = ProducerActivityFragment.buildTestKeyChain();
+                            mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
                             NFD.register(new Face("localhost"), "udp://" + oAddress, new Name("/test"), 1);
                         }
                         else {
