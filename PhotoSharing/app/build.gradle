@@ -23,6 +23,10 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile files('libs/jndn-0.5.jar')
-    compile files('libs/jndn-management-0.10.1.jar')
-    compile files('libs/jndn-utils-0.10.2.jar')
+
+    compile 'com.intel.jndn.utils:jndn-utils:0.10.2'
+    compile 'com.intel.jndn.management:jndn-management:0.10.1'
+    compile 'net.named-data.jndn-xx:jndn-xx-util:0.0.1'
+    compile group: 'com.google.guava', name: 'guava', version: '12.0'
+
 }
