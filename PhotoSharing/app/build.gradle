@@ -24,4 +24,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile files('libs/jndn-0.5.jar')
     compile files('libs/jndn-management-0.10.1.jar')
+    compile files('libs/jndn-utils-0.10.2.jar')
 }
