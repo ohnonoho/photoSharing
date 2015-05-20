@@ -19,7 +19,6 @@ import net.named_data.jndn.Face;
 import net.named_data.jndn.Name;
 import net.named_data.jndn.security.KeyChain;
 
-
 import java.net.Inet4Address;
 
 import java.net.InetAddress;
@@ -152,7 +151,10 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                             Face mFace = new Face("localhost");
                             KeyChain keyChain = ProducerActivityFragment.buildTestKeyChain();
                             mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
-                            NFD.register(new Face("localhost"), "udp://" + oAddress, new Name("/test"), 1);
+                            NFD nfd = new NFD();
+                           // Face m2 = new Face();
+                            nfd.register(mFace, "udp://" + oAddress, new Name("/test"), 1);
+
                         }
                         else {
                             localIP = oAddress;
@@ -164,6 +166,7 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         fragment.updateMyAddress(localIP);
 
                     } catch(Exception e) {
+                        e.printStackTrace();
                         Log.e(ProducerActivity.TAG, e.toString());
                     }
                 }
