@@ -108,9 +108,9 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                 }
             }
         } catch (SocketException ex) {
-            Log.e("AndroidNetworkAddressFactory", "getLocalIPAddress()", ex);
+            Log.e(ProducerActivity.TAG, "getLocalIPAddress()", ex);
         } catch (NullPointerException ex) {
-            Log.e("AndroidNetworkAddressFactory", "getLocalIPAddress()", ex);
+            Log.e(ProducerActivity.TAG, "getLocalIPAddress()", ex);
         }
         return null;
     }
