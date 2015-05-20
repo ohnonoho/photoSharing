@@ -265,6 +265,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 Log.i(RequestTask.TAG, "Send the request");
 
                 Interest interest = new Interest(new Name("/test"));
+                interest.setInterestLifetimeMilliseconds(10000);
                 mFace.expressInterest(interest, new OnData() {
                     @Override
                     public void onData(Interest interest, Data data) {

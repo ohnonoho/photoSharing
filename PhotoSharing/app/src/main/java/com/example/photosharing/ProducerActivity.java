@@ -3,6 +3,7 @@ package com.example.photosharing;
 import android.content.IntentFilter;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.StrictMode;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -70,6 +71,9 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
 //            }
 //        });
 
+        //StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        //StrictMode.setThreadPolicy(policy);
     }
 
 

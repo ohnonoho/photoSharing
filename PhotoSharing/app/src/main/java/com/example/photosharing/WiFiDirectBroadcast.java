@@ -13,11 +13,21 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 
+import com.google.protobuf.ByteString;
 import com.intel.jndn.management.NFD;
 
+import com.example.photosharing.ControlParametersProto.ControlParametersTypes.ControlParametersMessage;
+import net.named_data.jndn.ControlParameters;
+import net.named_data.jndn.Data;
 import net.named_data.jndn.Face;
+import net.named_data.jndn.Interest;
 import net.named_data.jndn.Name;
-
+import net.named_data.jndn.OnData;
+import net.named_data.jndn.OnTimeout;
+import net.named_data.jndn.encoding.ProtobufTlv;
+import net.named_data.jndn.security.KeyChain;
+import net.named_data.jndn.ForwardingFlags;
+import net.named_data.jndn.util.Blob;
 
 import java.net.Inet4Address;
 
@@ -131,6 +141,15 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
 
 
     private class RequestOwner extends AsyncTask<Void, Void, Void> {
+        private InetAddress groupOwnerAddress;
+        private ProducerActivityFragment fragment;
+        private String oAddress;
+        private String localIP;
+        private boolean isOwner;
+        private Face mFace;
+        private int faceId;
+
+        private String returnData = "No return data";
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -139,31 +158,161 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                 public void onConnectionInfoAvailable(WifiP2pInfo info) {
 
                     try {
-                        InetAddress groupOwnerAddress = info.groupOwnerAddress;
-                        ProducerActivityFragment fragment = (ProducerActivityFragment)
+                        groupOwnerAddress = info.groupOwnerAddress;
+                        fragment = (ProducerActivityFragment)
                                 mProducerActivity.getFragmentManager().findFragmentById(R.id.producer_fragment);
-                        String oAddress = groupOwnerAddress.getHostAddress();
-                        boolean isOwner = info.isGroupOwner;
+                        oAddress = groupOwnerAddress.getHostAddress();
+                        isOwner = info.isGroupOwner;
+                        mFace = new Face("localhost");
+                        KeyChain keyChain = ProducerActivityFragment.buildTestKeyChain();
+                        mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
                         // String name = groupOwnerAddress.getHostName();
-                        String localIP;
-                        if (!isOwner){
+                        if (!isOwner) {
                             localIP = getDottedDecimalIP(getLocalIPAddress());
-                            NFD.register(new Face("localhost"), "udp://" + oAddress, new Name("/test"), 1);
-                        }
-                        else {
+                            //NFD nfd = new NFD();
+                            Thread thread = new Thread(new Runnable(){
+
+                                class RegisterTask extends AsyncTask<Void, Void, Integer> {
+
+                                    Nfdc nfdc = new Nfdc();
+                                    @Override
+                                    protected Integer doInBackground(Void... params) {
+                                        int mFaceID = 0;
+                                        try {
+//                                            mFaceID = NFD.createFace(mFace, "udp4://" + oAddress);
+                                            mFaceID = nfdc.faceCreate("udp://" + oAddress);
+                                            nfdc.ribRegisterPrefix(new Name("/test"), mFaceID, 10, true, false);
+                                            nfdc.shutdown();
+                                        } catch(Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                        return mFaceID;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(Integer integer) {
+                                        super.onPostExecute(integer);
+                                        try {
+//                                            faceId = integer;
+//                                            NFD.register(mFace, faceId, new Name("/test"), 1);
+//                                            ForwardingFlags flags = new ForwardingFlags();
+//                                            flags.setChildInherit(true);
+//                                            flags.setCapture(false);
+//                                            NFD.register(mFace,
+//                                                    new ControlParameters()
+//                                                            .setName(new Name("/test"))
+//                                                            .setFaceId(faceId)
+//                                                            .setCost(1)
+//                                                            .setForwardingFlags(flags));
+//                                        nfdc.ribRegisterPrefix(new Name("/test"), integer, 10, true, false);
+//                                        nfdc.shutdown();
+
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }
+                                }
+                                @Override
+                                public void run() {
+                                    try {
+//                                        Nfdc nfdc = new Nfdc();
+//                                        faceId = nfdc.faceCreate("udp4://" + oAddress);
+//                                        faceId = NFD.createFace(mFace, "udp4://" + oAddress);
+                                        RegisterTask task = new RegisterTask();
+                                        task.execute();
+//                                        NFD.register(mFace, faceId, new Name("/test"), 1);
+//                                        ForwardingFlags flags = new ForwardingFlags();
+//                                        flags.setChildInherit(true);
+//                                        flags.setCapture(false);
+//                                        NFD.register(mFace,
+//                                                new ControlParameters()
+//                                                        .setName(new Name("/test"))
+//                                                        .setFaceId(faceId)
+//                                                        .setCost(1)
+//                                                        .setForwardingFlags(flags));
+//                                        NFD.register(mFace,
+//                                                "udp://" + oAddress,
+//                                                new Name("/test"),
+//                                                10);
+                                        //Your code goes here
+
+//                                        nfdc.ribRegisterPrefix(new Name("/test"), faceId, 10, true, false);
+//                                        nfdc.shutdown();
+
+///////////////// //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//                                        Face face = new Face();
+//                                        ControlParametersMessage.Builder builder = ControlParametersMessage.newBuilder();
+//                                        builder.getControlParametersBuilder().setUri("upd4://" + oAddress + ":6363");
+//                                        ControlParametersProto.ControlParametersTypes.Name.Builder nameBuilder =
+//                                                builder.getControlParametersBuilder().getNameBuilder();
+//                                        Name prefix = new Name("/test");
+//                                        for (int i = 0; i < prefix.size(); ++i)
+//                                            nameBuilder.addComponent(ByteString.copyFrom(prefix.get(i).getValue().buf()));
+//                                        builder.getControlParametersBuilder().setFaceId(280);
+//                                        builder.getControlParametersBuilder().setOrigin(255);
+//                                        builder.getControlParametersBuilder().setCost(0);
+//                                        builder.getControlParametersBuilder().setFlags(1);
+//                                        Blob encodedControlParameters = ProtobufTlv.encode(builder.build());
+//
+//                                        Interest interest = new Interest(new Name("/localhost/nfd/rib/register"));
+//                                        interest.getName().append(encodedControlParameters);
+//                                        interest.setInterestLifetimeMilliseconds(10000);
+//
+//                                        // Sign and express the interest.
+//                                        face.makeCommandInterest(interest);
+//
+//
+//                                        face.expressInterest(interest,
+//                                                new OnData() {
+//                                                    @Override
+//                                                    public void onData(Interest interest, Data data) {
+//                                                        Log.i(ProducerActivity.TAG, interest.getName().toString());
+//                                                        Log.i(ProducerActivity.TAG, data.getContent().toString());
+//                                                        returnData = "Register Success";
+//                                                    }
+//                                                },
+//                                                new OnTimeout() {
+//                                                    @Override
+//                                                    public void onTimeout(Interest interest) {
+//                                                        Log.e(ProducerActivity.TAG, "Time out!!!!!!!!!!!");
+//                                                        returnData = "Register Failed";
+//                                                    }
+//                                                });
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                            thread.run();
+                            //NFD nfd = new NFD();
+                            // Face m2 = new Face();
+                            //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 1);
+                            //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 10);
+                            Log.i(ProducerActivity.TAG, "register");
+
+                        } else {
+                            Log.i(ProducerActivity.TAG, "i'm not the owner");
                             localIP = oAddress;
                         }
                         Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
                         Log.i(ProducerActivity.TAG, "My Address:" + localIP);
+                        Log.i(ProducerActivity.TAG, "Register status: " + returnData);
                         fragment.updateGroupOwner(isOwner, oAddress);
+
 
                         fragment.updateMyAddress(localIP);
 
-                    } catch(Exception e) {
+                    } catch (Exception e) {
+                        e.printStackTrace();
                         Log.e(ProducerActivity.TAG, e.toString());
                     }
                 }
             });
+
+
             return null;
         }
     }
