@@ -165,7 +165,7 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                                 public void run() {
                                     try {
                                         faceId = NFD.createFace(mFace, "udp://" + oAddress);
-                                        //NFD.register(mFace, faceId, new Name("/test"), 1);
+                                        NFD.register(mFace, faceId, new Name("/test"), 1);
                                         ForwardingFlags flags = new ForwardingFlags();
                                         flags.setChildInherit(true);
                                         flags.setCapture(false);
@@ -175,11 +175,10 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
 //                                                        .setFaceId(faceId)
 //                                                        .setCost(1)
 //                                                        .setForwardingFlags(flags));
-                                        NFD.register(mFace,
-                                                "udp://" + oAddress,
-                                                new Name("/test"),
-                                                10);
-                                        Log.i(ProducerActivity.TAG, "register");
+//                                        NFD.register(mFace,
+//                                                "udp://" + oAddress,
+//                                                new Name("/test"),
+//                                                10);
                                         //Your code goes here
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -189,8 +188,11 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                             //NFD nfd = new NFD();
                             // Face m2 = new Face();
                             //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 1);
+                            //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 10);
+                            Log.i(ProducerActivity.TAG, "register");
 
                         } else {
+                            Log.i(ProducerActivity.TAG, "i'm not the owner");
                             localIP = oAddress;
                         }
                         Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
