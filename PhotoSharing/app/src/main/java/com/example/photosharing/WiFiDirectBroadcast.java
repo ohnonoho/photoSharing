@@ -12,6 +12,11 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.intel.jndn.management.NFD;
+
+import net.named_data.jndn.Face;
+import net.named_data.jndn.Name;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,6 +103,12 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         // String name = groupOwnerAddress.getHostName();
                         Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
                         fragment.updateGroupOwner(isOwner, oAddress);
+
+                        // Register the prefix on the slaves NFD
+                        // The ip address now is hard code to see if we could register the prefix on NFD using the libaray
+                        if (isOwner == false) {
+                            NFD.register(new Face("localhost"), "udp://192.168.49.1", new Name("/test"), 1);
+                        }
                     } catch(Exception e) {
                         Log.e(ProducerActivity.TAG, e.toString());
                     }
