@@ -3,12 +3,16 @@ package com.example.photosharing;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,10 +45,10 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
             // Determine if wifi p2p model is enable or not, alert the Activity
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
             if(state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
-                Log.d(ProducerActivity.TAG, "WiFi P2P Enabled");
+                Log.i(ProducerActivity.TAG, "WiFi P2P Enabled");
                 mProducerActivity.setIsWifiP2pEnabled(true);
             } else {
-                Log.d(ProducerActivity.TAG, "WiFi P2P Not Enabled");
+                Log.i(ProducerActivity.TAG, "WiFi P2P Not Enabled");
                 mProducerActivity.setIsWifiP2pEnabled(false);
             }
 
@@ -54,9 +58,19 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                 mManager.requestPeers(mChannel, (WifiP2pManager.PeerListListener)
                         mProducerActivity.getFragmentManager().findFragmentById(R.id.producer_fragment));
             }
-            Log.d(WiFiDirectBroadcast.TAG, "P2P peers changed");
+            Log.i(WiFiDirectBroadcast.TAG, "P2P peers changed");
 
         } else if(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
+
+            Log.i(ProducerActivity.TAG, "Connection Changed");
+
+            if(mManager != null) {
+                NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+                if(networkInfo.isConnected()) {
+                    RequestOwner task = new RequestOwner();
+                    task.execute();
+                }
+            }
 
         } else if(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             ProducerActivityFragment fragment = (ProducerActivityFragment)
@@ -65,5 +79,32 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
         }
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private class RequestOwner extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
+                @Override
+                public void onConnectionInfoAvailable(WifiP2pInfo info) {
+
+                    try {
+                        InetAddress groupOwnerAddress = info.groupOwnerAddress;
+                        ProducerActivityFragment fragment = (ProducerActivityFragment)
+                                mProducerActivity.getFragmentManager().findFragmentById(R.id.producer_fragment);
+                        String oAddress = groupOwnerAddress.getHostAddress();
+                        boolean isOwner = info.isGroupOwner;
+                        // String name = groupOwnerAddress.getHostName();
+                        Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
+                        fragment.updateGroupOwner(isOwner, oAddress);
+                    } catch(Exception e) {
+                        Log.e(ProducerActivity.TAG, e.toString());
+                    }
+                }
+            });
+            return null;
+        }
+    }
 
 }

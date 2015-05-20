@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,6 @@ import net.named_data.jndn.security.identity.MemoryIdentityStorage;
 import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
 import net.named_data.jndn.transport.Transport;
 import net.named_data.jndn.util.Blob;
-
-import org.w3c.dom.Text;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -164,7 +163,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 TextView top = (TextView) v.findViewById(R.id.device_name);
                 TextView bottom = (TextView) v.findViewById(R.id.device_status);
 
-                top.setText("My name is " + device.deviceName + " and my address is " + device.deviceAddress);
+                top.setText("Name: " + device.deviceName + ", Address: " + device.deviceAddress);
                 bottom.setText(getDeviceStatus(device.status));
             }
             return v;
@@ -174,9 +173,18 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     public void updateThisDevice(WifiP2pDevice device) {
         this.device = device;
         TextView top = (TextView) mView.findViewById(R.id.producer_name);
-        top.setText("This device is: " + device.deviceName + " and the address is " + device.deviceAddress);
+        top.setText("Device: " + device.deviceName + ", Address: " + device.deviceAddress);
         TextView bottom = (TextView) mView.findViewById(R.id.producer_status);
-        bottom.setText("This device's status is: " + getDeviceStatus(device.status));
+        bottom.setText("Status: " + getDeviceStatus(device.status));
+    }
+
+    public void updateGroupOwner(boolean isOwner, String oAddress) {
+//        TextView groupOwnerName = (TextView) mView.findViewById(R.id.group_owner_name);
+//        groupOwnerName.setText("Owner Name: " + name);
+        TextView groupOwnerAddress = (TextView) mView.findViewById(R.id.group_owner_address);
+        groupOwnerAddress.setText("Owner Address: " + oAddress);
+        TextView ownerStatus = (TextView) mView.findViewById(R.id.owner_status);
+        ownerStatus.setText("Owner Status: " + isOwner);
     }
 
     public interface ProducerActionListener {
@@ -264,10 +272,10 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                     }
                 });
 
-//                while(!shouldStop) {
-//                    // Log.i(RequestTask.TAG, "Requiring For the Data");
-//                    mFace.processEvents();
-//                }
+                while(!shouldStop) {
+                    // Log.i(RequestTask.TAG, "Requiring For the Data");
+                    mFace.processEvents();
+                }
             } catch (Exception e) {
                 Log.e(RequestTask.TAG, e.toString());
             }
