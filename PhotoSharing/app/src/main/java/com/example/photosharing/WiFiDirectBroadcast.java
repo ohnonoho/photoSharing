@@ -12,8 +12,12 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -81,6 +85,43 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private byte[] getLocalIPAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        if (inetAddress instanceof Inet4Address) { // fix for Galaxy Nexus. IPv4 is easy to use :-)
+                            return inetAddress.getAddress();
+                        }
+                        //return inetAddress.getHostAddress().toString(); // Galaxy Nexus returns IPv6
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            Log.e("AndroidNetworkAddressFactory", "getLocalIPAddress()", ex);
+        } catch (NullPointerException ex) {
+            Log.e("AndroidNetworkAddressFactory", "getLocalIPAddress()", ex);
+        }
+        return null;
+    }
+
+    private String getDottedDecimalIP(byte[] ipAddr) {
+        //convert to dotted decimal notation:
+        String ipAddrStr = "";
+        for (int i=0; i<ipAddr.length; i++) {
+            if (i > 0) {
+                ipAddrStr += ".";
+            }
+            ipAddrStr += ipAddr[i]&0xFF;
+        }
+        return ipAddrStr;
+    }
+
+
+
+
     private class RequestOwner extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -96,8 +137,17 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         String oAddress = groupOwnerAddress.getHostAddress();
                         boolean isOwner = info.isGroupOwner;
                         // String name = groupOwnerAddress.getHostName();
+                        String localIP;
+                        if (!isOwner){
+                            localIP = getDottedDecimalIP(getLocalIPAddress());
+                        }
+                        else {
+                            localIP = oAddress;
+                        }
                         Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
+                        Log.i(ProducerActivity.TAG, "My Address:" + localIP);
                         fragment.updateGroupOwner(isOwner, oAddress);
+                        fragment.updateMyAddress(localIP);
                     } catch(Exception e) {
                         Log.e(ProducerActivity.TAG, e.toString());
                     }
