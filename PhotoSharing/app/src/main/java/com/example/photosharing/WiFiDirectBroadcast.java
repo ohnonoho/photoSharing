@@ -19,6 +19,7 @@ import net.named_data.jndn.ControlParameters;
 import net.named_data.jndn.Face;
 import net.named_data.jndn.Name;
 import net.named_data.jndn.security.KeyChain;
+import net.named_data.jndn.ForwardingFlags;
 
 import java.net.Inet4Address;
 
@@ -132,64 +133,78 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
 
 
     private class RequestOwner extends AsyncTask<Void, Void, Void> {
+        private InetAddress groupOwnerAddress;
+        private ProducerActivityFragment fragment;
+        private String oAddress;
+        private String localIP;
+        private boolean isOwner;
+        private Face mFace;
+        private int faceId;
 
         @Override
         protected Void doInBackground(Void... params) {
-            
+            mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
+                @Override
+                public void onConnectionInfoAvailable(WifiP2pInfo info) {
 
-            new Thread(){
-                public void run() {
-                    mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
-                        @Override
-                        public void onConnectionInfoAvailable(WifiP2pInfo info) {
-
-                            try {
-                                InetAddress groupOwnerAddress = info.groupOwnerAddress;
-                                ProducerActivityFragment fragment = (ProducerActivityFragment)
-                                        mProducerActivity.getFragmentManager().findFragmentById(R.id.producer_fragment);
-                                String oAddress = groupOwnerAddress.getHostAddress();
-                                boolean isOwner = info.isGroupOwner;
-                                // String name = groupOwnerAddress.getHostName();
-                                String localIP;
-                                if (!isOwner) {
-                                    localIP = getDottedDecimalIP(getLocalIPAddress());
-                                    NFD nfd = new NFD();
-                                    Face mFace = new Face("localhost");
-                                    KeyChain keyChain = ProducerActivityFragment.buildTestKeyChain();
-                                    mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
-                                    int faceId = NFD.createFace(mFace, "udp://" + oAddress);
-
-                                    //NFD nfd = new NFD();
-                                    // Face m2 = new Face();
-                                    //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 1);
-                                    NFD.register(mFace, faceId, new Name("/test"), 1);
-
-                                    //                            NFD.register(mFace,
-                                    //                                    new ControlParameters()
-                                    //                                            .setName(new Name("/test"))
-                                    //                                            .setFaceId(faceId)
-                                    //                                            .setCost(1)
-                                    //                                            .setForwardingFlags(flags));
-                                    //                            //NFD.register();
-
-                                } else {
-                                    localIP = oAddress;
+                    try {
+                        groupOwnerAddress = info.groupOwnerAddress;
+                        fragment = (ProducerActivityFragment)
+                                mProducerActivity.getFragmentManager().findFragmentById(R.id.producer_fragment);
+                        oAddress = groupOwnerAddress.getHostAddress();
+                        isOwner = info.isGroupOwner;
+                        mFace = new Face("localhost");
+                        KeyChain keyChain = ProducerActivityFragment.buildTestKeyChain();
+                        mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
+                        // String name = groupOwnerAddress.getHostName();
+                        if (!isOwner) {
+                            localIP = getDottedDecimalIP(getLocalIPAddress());
+                            //NFD nfd = new NFD();
+                            Thread thread = new Thread(new Runnable(){
+                                @Override
+                                public void run() {
+                                    try {
+                                        faceId = NFD.createFace(mFace, "udp://" + oAddress);
+                                        //NFD.register(mFace, faceId, new Name("/test"), 1);
+                                        ForwardingFlags flags = new ForwardingFlags();
+                                        flags.setChildInherit(true);
+                                        flags.setCapture(false);
+//                                        NFD.register(mFace,
+//                                                new ControlParameters()
+//                                                        .setName(new Name("/test"))
+//                                                        .setFaceId(faceId)
+//                                                        .setCost(1)
+//                                                        .setForwardingFlags(flags));
+                                        NFD.register(mFace,
+                                                "udp://" + oAddress,
+                                                new Name("/test"),
+                                                10);
+                                        Log.i(ProducerActivity.TAG, "register");
+                                        //Your code goes here
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
-                                Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
-                                Log.i(ProducerActivity.TAG, "My Address:" + localIP);
-                                fragment.updateGroupOwner(isOwner, oAddress);
+                            });
+                            //NFD nfd = new NFD();
+                            // Face m2 = new Face();
+                            //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 1);
 
-                                fragment.updateMyAddress(localIP);
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                Log.e(ProducerActivity.TAG, e.toString());
-                            }
+                        } else {
+                            localIP = oAddress;
                         }
-                    });
-                }
+                        Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
+                        Log.i(ProducerActivity.TAG, "My Address:" + localIP);
+                        fragment.updateGroupOwner(isOwner, oAddress);
 
-            }.start();
+                        fragment.updateMyAddress(localIP);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.e(ProducerActivity.TAG, e.toString());
+                    }
+                }
+            });
 
 
             return null;
