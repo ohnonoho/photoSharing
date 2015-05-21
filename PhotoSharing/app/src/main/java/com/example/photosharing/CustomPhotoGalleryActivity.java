@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 
 public class CustomPhotoGalleryActivity extends Activity {
+    public static final String TAG = "CustomPhotoGallery Activity";
     private GridView grdImages;
     private Button btnSelect;
 
@@ -49,6 +50,9 @@ public class CustomPhotoGalleryActivity extends Activity {
         final String orderBy = MediaStore.Images.Media._ID;
         @SuppressWarnings("deprecation")
         Cursor imagecursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
+        if (imagecursor == null){
+            Log.i(TAG, "image cursor is null, indicates that there is no images");
+        }
         int image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
         this.count = imagecursor.getCount();
         this.arrPath = new String[this.count];
@@ -90,11 +94,13 @@ public class CustomPhotoGalleryActivity extends Activity {
                 }
             }
         });
+        Log.i(this.TAG, "onCreate finished");
     }
     @Override
     public void onBackPressed() {
         setResult(Activity.RESULT_CANCELED);
         super.onBackPressed();
+        Log.i(this.TAG, "onBackPressed finished");
 
     }
     /**
@@ -226,5 +232,35 @@ public class CustomPhotoGalleryActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.e(TAG, "start onRestart~~~");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e(TAG, "start onResume~~~");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e(TAG, "start onPause~~~");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.e(TAG, "start onStop~~~");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e(TAG, "start onDestroy~~~");
     }
 }

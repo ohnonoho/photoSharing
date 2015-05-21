@@ -1,7 +1,18 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/producer_fragment"
-    android:name="com.example.photosharing.ProducerActivityFragment"
-    tools:layout="@layout/fragment_producer"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+        <fragment android:id="@+id/producer_fragment"
+            android:name="com.example.photosharing.ProducerActivityFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_producer" />
+
+        <fragment android:id="@+id/producer_select_photos_fragment"
+            android:name="com.example.photosharing.ProducerActivitySelectPhotosFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_producer_activity_select_photos" />
+
+</RelativeLayout>

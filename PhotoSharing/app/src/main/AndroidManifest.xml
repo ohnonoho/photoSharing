@@ -12,6 +12,10 @@
         android:name="android.permission.INTERNET"
         android:required="true" />
 
+    <!-- in order to access user's gallery -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,17 +24,18 @@
         <activity
             android:name=".ProducerActivity"
             android:label="@string/title_activity_producer"
-            >
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
 
         </activity>
         <activity
             android:name=".CustomPhotoGalleryActivity"
             android:label="@string/title_activity_custom_photo_gallery"
-            android:launchMode="singleTask" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            >
+
         </activity>
     </application>
 
