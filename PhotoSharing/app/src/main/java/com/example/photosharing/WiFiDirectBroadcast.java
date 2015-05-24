@@ -179,9 +179,9 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                                     protected Integer doInBackground(Void... params) {
                                         int mFaceID = 0;
                                         try {
-//                                            mFaceID = NFD.createFace(mFace, "udp4://" + oAddress);
                                             mFaceID = nfdc.faceCreate("udp://" + oAddress);
                                             nfdc.ribRegisterPrefix(new Name("/test"), mFaceID, 10, true, false);
+                                            nfdc.ribRegisterPrefix(new Name("/test2"), mFaceID, 10, true, false);
                                             nfdc.shutdown();
                                         } catch(Exception e) {
                                             e.printStackTrace();
@@ -189,63 +189,19 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                                         return mFaceID;
                                     }
 
-                                    @Override
-                                    protected void onPostExecute(Integer integer) {
-                                        super.onPostExecute(integer);
-                                        try {
-//                                            faceId = integer;
-//                                            NFD.register(mFace, faceId, new Name("/test"), 1);
-//                                            ForwardingFlags flags = new ForwardingFlags();
-//                                            flags.setChildInherit(true);
-//                                            flags.setCapture(false);
-//                                            NFD.register(mFace,
-//                                                    new ControlParameters()
-//                                                            .setName(new Name("/test"))
-//                                                            .setFaceId(faceId)
-//                                                            .setCost(1)
-//                                                            .setForwardingFlags(flags));
-//                                        nfdc.ribRegisterPrefix(new Name("/test"), integer, 10, true, false);
-//                                        nfdc.shutdown();
-
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-
-                                    }
                                 }
                                 @Override
                                 public void run() {
                                     try {
-//                                        Nfdc nfdc = new Nfdc();
-//                                        faceId = nfdc.faceCreate("udp4://" + oAddress);
-//                                        faceId = NFD.createFace(mFace, "udp4://" + oAddress);
                                         RegisterTask task = new RegisterTask();
                                         task.execute();
-//                                        NFD.register(mFace, faceId, new Name("/test"), 1);
-//                                        ForwardingFlags flags = new ForwardingFlags();
-//                                        flags.setChildInherit(true);
-//                                        flags.setCapture(false);
-//                                        NFD.register(mFace,
-//                                                new ControlParameters()
-//                                                        .setName(new Name("/test"))
-//                                                        .setFaceId(faceId)
-//                                                        .setCost(1)
-//                                                        .setForwardingFlags(flags));
-//                                        NFD.register(mFace,
-//                                                "udp://" + oAddress,
-//                                                new Name("/test"),
-//                                                10);
-                                        //Your code goes here
-
-//                                        nfdc.ribRegisterPrefix(new Name("/test"), faceId, 10, true, false);
-//                                        nfdc.shutdown();
 
 ///////////////// //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //                                        Face face = new Face();
 //                                        ControlParametersMessage.Builder builder = ControlParametersMessage.newBuilder();
-//                                        builder.getControlParametersBuilder().setUri("upd4://" + oAddress + ":6363");
+//                                        builder.getControlParametersBuilder().setUri("udp4://" + oAddress + ":6363");
 //                                        ControlParametersProto.ControlParametersTypes.Name.Builder nameBuilder =
 //                                                builder.getControlParametersBuilder().getNameBuilder();
 //                                        Name prefix = new Name("/test");
@@ -287,10 +243,6 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                                 }
                             });
                             thread.run();
-                            //NFD nfd = new NFD();
-                            // Face m2 = new Face();
-                            //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 1);
-                            //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 10);
                             Log.i(ProducerActivity.TAG, "register");
 
                         } else {

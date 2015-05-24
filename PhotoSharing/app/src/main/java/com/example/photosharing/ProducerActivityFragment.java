@@ -234,6 +234,25 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                         }
                 );
 
+                mFace.registerPrefix(new Name("/test2"), new OnInterest() {
+                    @Override
+                    public void onInterest(Name name, Interest interest, Transport transport, long l) {
+                        Data data = new Data(interest.getName());
+                        data.setContent(new Blob("This is the test data2!"));
+                        try {
+                            Log.i(ProduceTask.TAG, "The data2 has been send");
+                            mFace.putData(data);
+                        } catch (IOException e) {
+                            Log.e(ProduceTask.TAG, "Failed to send data");
+                        }
+                    }
+                }, new OnRegisterFailed() {
+                    @Override
+                    public void onRegisterFailed(Name name) {
+                        Log.e(ProduceTask.TAG, "Failed to register the data");
+                    }
+                });
+
                 while(true) {
                     mFace.processEvents();
                 }
@@ -277,8 +296,27 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                     @Override
                     public void onTimeout(Interest interest) {
                         Log.e(RequestTask.TAG, "TimeOut!");
+                        shouldStop = true;
                     }
                 });
+
+                // Test if we could register two prefix at the same time
+//                Interest interest2 = new Interest(new Name("/test2"));
+//                interest2.setInterestLifetimeMilliseconds(10000);
+//                mFace.expressInterest(interest2, new OnData() {
+//                    @Override
+//                    public void onData(Interest interest, Data data) {
+//                        Log.i(RequestTask.TAG, "The data2 has been received");
+//                        receiveVal = data.getContent().toString();
+//                        shouldStop = true;
+//                    }
+//                }, new OnTimeout() {
+//                    @Override
+//                    public void onTimeout(Interest interest) {
+//                        Log.e(RequestTask.TAG, "TimeOut!");
+//                        shouldStop = true;
+//                    }
+//                });
 
                 while(!shouldStop) {
                     // Log.i(RequestTask.TAG, "Requiring For the Data");
