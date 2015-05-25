@@ -89,7 +89,9 @@ public class CustomPhotoGalleryActivity extends Activity {
                     Log.d("SelectedImages", selectImages);
                     Intent i = new Intent();
                     i.putExtra("data", selectImages);
-                    setResult(Activity.RESULT_OK, i);
+                    i.setClass(CustomPhotoGalleryActivity.this, FinishActivity.class);
+                    startActivity(i);
+                    //setResult(Activity.RESULT_OK, i);
                     finish();
                 }
             }

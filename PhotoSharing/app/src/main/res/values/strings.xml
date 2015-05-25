@@ -9,5 +9,9 @@
     <string name="button_require">Require</string>
     <string name="title_activity_custom_photo_gallery">CustomPhotoGalleryActivity</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_menu">MenuActivity</string>
+    <string name="choices">I want to</string>
+    <string name="title_activity_device_list">DeviceListActivity</string>
+    <string name="title_activity_finish">FinishActivity</string>
 
 </resources>

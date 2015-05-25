@@ -13,8 +13,7 @@
         android:required="true" />
 
     <!-- in order to access user's gallery -->
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -23,19 +22,29 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".ProducerActivity"
-            android:label="@string/title_activity_producer"
-            android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
+            android:label="@string/title_activity_producer" >
         </activity>
         <activity
             android:name=".CustomPhotoGalleryActivity"
-            android:label="@string/title_activity_custom_photo_gallery"
-            >
+            android:label="@string/title_activity_custom_photo_gallery" >
+        </activity>
+        <activity
+            android:name=".MenuActivity"
+            android:label="@string/title_activity_menu"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".DeviceListActivity"
+            android:label="@string/title_activity_device_list" >
+        </activity>
+        <activity
+            android:name=".FinishActivity"
+            android:label="@string/title_activity_finish" >
         </activity>
     </application>
 
