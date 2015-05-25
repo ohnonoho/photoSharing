@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import net.named_data.jndn.Data;
@@ -50,6 +51,9 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     private WifiP2pDevice device = null;
     private View mView = null;
 
+    // The map used to hold the prefix and the data
+    HashMap<String, String> prefixMap = new HashMap<>();
+
     public ProducerActivityFragment() {
     }
 
@@ -59,6 +63,9 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         mView = inflater.inflate(R.layout.fragment_producer, container, false);
 
         this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.list_item, peers));
+
+        prefixMap.put("/test/1", "This is test data 1.");
+        prefixMap.put("/test/2", "This is test data 2.");
 
         Button btnProduce = (Button) mView.findViewById(R.id.produce_button);
         btnProduce.setOnClickListener(new View.OnClickListener() {
@@ -203,6 +210,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     private class ProduceTask extends AsyncTask<Void, Void, Void> {
 
         private Face mFace;
+        private String prefix;
 
         private static final String TAG = "Produce Task";
 
@@ -212,46 +220,30 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 KeyChain keyChain = buildTestKeyChain();
                 mFace = new Face("localhost");
                 mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
-                mFace.registerPrefix(new Name("/test"),
-                        new OnInterest() {
-                            @Override
-                            public void onInterest(Name name, Interest interest, Transport transport, long l) {
-                                Data data = new Data(interest.getName());
-                                data.setContent(new Blob("This is the test data!"));
-                                try {
-                                    Log.i(ProduceTask.TAG, "The data has been send");
-                                    mFace.putData(data);
-                                } catch(IOException e) {
-                                    Log.e(ProduceTask.TAG, "Failed to send data");
-                                }
-                            }
-                        },
-                        new OnRegisterFailed() {
-                            @Override
-                            public void onRegisterFailed(Name name) {
-                                Log.e(ProduceTask.TAG, "Failed to register the data");
-                            }
-                        }
-                );
 
-                mFace.registerPrefix(new Name("/test2"), new OnInterest() {
-                    @Override
-                    public void onInterest(Name name, Interest interest, Transport transport, long l) {
-                        Data data = new Data(interest.getName());
-                        data.setContent(new Blob("This is the test data2!"));
-                        try {
-                            Log.i(ProduceTask.TAG, "The data2 has been send");
-                            mFace.putData(data);
-                        } catch (IOException e) {
-                            Log.e(ProduceTask.TAG, "Failed to send data");
+                String myIP = ((ProducerActivity)getActivity()).getIPAddress();
+
+                for(String key : prefixMap.keySet()) {
+                    prefix = key;
+                    mFace.registerPrefix(new Name("/" + myIP + key), new OnInterest() {
+                        @Override
+                        public void onInterest(Name name, Interest interest, Transport transport, long l) {
+                            Data data = new Data(interest.getName());
+                            data.setContent(new Blob(prefixMap.get(prefix)));
+                            try {
+                                Log.i(ProduceTask.TAG, "The data has been send.");
+                                mFace.putData(data);
+                            } catch(IOException e) {
+                                Log.e(ProduceTask.TAG, "Failed to send data");
+                            }
                         }
-                    }
-                }, new OnRegisterFailed() {
-                    @Override
-                    public void onRegisterFailed(Name name) {
-                        Log.e(ProduceTask.TAG, "Failed to register the data");
-                    }
-                });
+                    }, new OnRegisterFailed() {
+                        @Override
+                        public void onRegisterFailed(Name name) {
+                            Log.e(ProduceTask.TAG, "Failed to register the data");
+                        }
+                    });
+                }
 
                 while(true) {
                     mFace.processEvents();

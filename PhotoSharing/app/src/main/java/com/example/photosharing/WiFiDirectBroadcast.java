@@ -49,6 +49,10 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
     private WifiP2pManager.Channel mChannel;
     private ProducerActivity mProducerActivity;
 
+    String oAddress;
+    String localIP;
+
+
     private List peers = new ArrayList();
 
     public WiFiDirectBroadcast(WifiP2pManager manager, WifiP2pManager.Channel channel, ProducerActivity activity) {
@@ -137,17 +141,13 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
         return ipAddrStr;
     }
 
-
-
-
     private class RequestOwner extends AsyncTask<Void, Void, Void> {
         private InetAddress groupOwnerAddress;
         private ProducerActivityFragment fragment;
-        private String oAddress;
-        private String localIP;
+        // private String oAddress;
+        // private String localIP;
         private boolean isOwner;
         private Face mFace;
-        private int faceId;
 
         private String returnData = "No return data";
 
