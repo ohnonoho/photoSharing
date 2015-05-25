@@ -3,17 +3,23 @@ package com.example.photosharing;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 
 public class DeviceListActivity extends ActionBarActivity {
-
+    final String TAG = "DeviceListActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_list);
+        Intent intent = getIntent();
+        String[] devices = intent.getStringArrayExtra("devices");
+        int i ;
+        for (i = 0 ; i < devices.length ; i++)
+            Log.i(TAG, devices[i]);
     }
 
 
