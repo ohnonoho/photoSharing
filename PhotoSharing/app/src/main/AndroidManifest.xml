@@ -46,6 +46,10 @@
             android:name=".FinishActivity"
             android:label="@string/title_activity_finish" >
         </activity>
+        <activity
+            android:name=".BrowsePhotosActivity"
+            android:label="@string/title_activity_browse_photos" >
+        </activity>
     </application>
 
 </manifest>

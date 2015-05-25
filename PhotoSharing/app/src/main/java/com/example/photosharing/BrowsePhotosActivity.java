@@ -8,19 +8,19 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 
-public class DeviceListActivity extends ActionBarActivity {
+public class BrowsePhotosActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_device_list);
+        setContentView(R.layout.activity_browse_photos);
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_device_list, menu);
+        getMenuInflater().inflate(R.menu.menu_browse_photos, menu);
         return true;
     }
 
@@ -46,6 +46,5 @@ public class DeviceListActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-
     }
 }

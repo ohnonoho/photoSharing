@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,7 +27,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 
-public class CustomPhotoGalleryActivity extends Activity {
+public class CustomPhotoGalleryActivity extends ActionBarActivity {
     public static final String TAG = "CustomPhotoGallery Activity";
     private GridView grdImages;
     private Button btnSelect;
@@ -229,11 +230,19 @@ public class CustomPhotoGalleryActivity extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.cancel:
+                //Toast.makeText(this, "Are you sure to cancel?", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, MenuActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.action_settings:
+                Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

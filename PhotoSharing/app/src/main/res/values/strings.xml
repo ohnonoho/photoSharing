@@ -13,5 +13,6 @@
     <string name="choices">I want to</string>
     <string name="title_activity_device_list">DeviceListActivity</string>
     <string name="title_activity_finish">FinishActivity</string>
+    <string name="title_activity_browse_photos">BrowsePhotosActivity</string>
 
 </resources>
