@@ -64,13 +64,17 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
         this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.list_item, peers));
 
-        prefixMap.put("/test1", "This is test data 1.");
-        prefixMap.put("/test2", "This is test data 2.");
+        // prefixMap.put("/test1", "This is test data 1.");
+        // prefixMap.put("/test2", "This is test data 2.");
 
         Button btnProduce = (Button) mView.findViewById(R.id.produce_button);
         btnProduce.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
+                String localIP = ((ProducerActivity)getActivity()).getIPAddress();
+                prefixMap.put("/" + localIP + "/test1", "This is test data 1!");
+                prefixMap.put("/" + localIP + "/test2", "This is test data 2!");
                 ProduceTask produceTask = new ProduceTask();
                 produceTask.execute();
             }
@@ -302,9 +306,9 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 KeyChain keyChain = buildTestKeyChain();
                 mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 
-                Log.i(RequestTask.TAG, "Send the request");
                 String oAddress = ((ProducerActivity)getActivity()).getOwnerIPAddress();
-                Interest interest = new Interest(new Name(params[0]));
+                Log.i(RequestTask.TAG, "Send the request to" + oAddress);
+                Interest interest = new Interest(new Name("/" + oAddress + params[0]));
                 interest.setInterestLifetimeMilliseconds(10000);
                 mFace.expressInterest(interest, new OnData() {
                     @Override
@@ -368,8 +372,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                         try {
                             Nfdc nfdc = new Nfdc();
                             mFaceID = nfdc.faceCreate("udp://" + oAddress);
-                            nfdc.ribRegisterPrefix(new Name("/test1"), mFaceID, 10, true, false);
-                            nfdc.ribRegisterPrefix(new Name("/test2"), mFaceID, 10, true, false);
+                            nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test1"), mFaceID, 10, true, false);
+                            nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test2"), mFaceID, 10, true, false);
                             nfdc.shutdown();
                         } catch(Exception e) {
                             e.printStackTrace();
