@@ -7,17 +7,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 
 public class MenuActivity extends ActionBarActivity {
+    private Button btnFindDevices;
     private Button btnGetPhotos;
     private Button btnSharePhotos;
+    public static boolean wifDirectConnected = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
         btnGetPhotos = (Button) this.findViewById(R.id.btnGetPhotos);
         btnSharePhotos = (Button) this.findViewById(R.id.btnSharePhotos);
+        btnFindDevices = (Button) this.findViewById(R.id.btnFindDevices);
         btnGetPhotos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -42,6 +46,13 @@ public class MenuActivity extends ActionBarActivity {
                 //startActivityForResult(intent, requestcode);
             }
         });
+        btnFindDevices.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //send to wifi direct activity
+            }
+        });
+
     }
 
 
@@ -65,5 +76,23 @@ public class MenuActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (wifDirectConnected){
+            btnGetPhotos.setEnabled(true);
+            btnGetPhotos.setBackground(getResources().getDrawable(R.drawable.btnviewothersenable));
+            btnSharePhotos.setEnabled(true);
+            btnSharePhotos.setBackground(getResources().getDrawable(R.drawable.btnsharemyphotosenable));
+        }
+        else{
+            Toast.makeText(getApplicationContext(), "To get started, you may have to connect to other devices first", Toast.LENGTH_LONG).show();
+            btnGetPhotos.setEnabled(false);
+            btnGetPhotos.setBackground(getResources().getDrawable(R.drawable.btnviewothersdisable));
+            btnSharePhotos.setEnabled(false);
+            btnSharePhotos.setBackground(getResources().getDrawable(R.drawable.btnsharemyphotosdisable));
+        }
     }
 }
