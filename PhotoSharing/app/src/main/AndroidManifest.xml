@@ -34,6 +34,7 @@
             android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -48,6 +49,10 @@
         <activity
             android:name=".BrowsePhotosActivity"
             android:label="@string/title_activity_browse_photos" >
+        </activity>
+        <activity
+            android:name=".PhotoDetailsActivity"
+            android:label="@string/title_activity_photo_details" >
         </activity>
     </application>
 
