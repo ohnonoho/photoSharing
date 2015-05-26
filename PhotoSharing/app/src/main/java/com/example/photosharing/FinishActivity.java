@@ -3,13 +3,16 @@ package com.example.photosharing;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 
 public class FinishActivity extends ActionBarActivity {
+    final String TAG="FinishActivity";
     private Button btnBackToMenu;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +26,14 @@ public class FinishActivity extends ActionBarActivity {
                 startActivity(intent);
             }
         });
+        Intent intent = getIntent();
+        String[] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        Log.e(TAG, "LENGTH:" + selectedPhotoPaths.length);
+        //do something on NFD !!!!!
+        int i = 0;
+        for (i =0 ; i < selectedPhotoPaths.length; i ++){
+            Log.e(TAG, selectedPhotoPaths[i]);
+        }
     }
 
 

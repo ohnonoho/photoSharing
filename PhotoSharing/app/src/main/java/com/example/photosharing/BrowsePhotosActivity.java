@@ -55,6 +55,7 @@ public class BrowsePhotosActivity extends ActionBarActivity {
 
     private ArrayList<ImageItem> getData() {
         // use the device name to retrive photos from the other device
+        //do something on NFD !!!!!
         final ArrayList<ImageItem> imageItems = new ArrayList<>();
         TypedArray imgs = getResources().obtainTypedArray(R.array.image_ids);
         for (int i = 0; i < imgs.length(); i++) {

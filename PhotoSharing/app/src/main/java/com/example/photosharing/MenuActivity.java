@@ -23,6 +23,7 @@ public class MenuActivity extends ActionBarActivity {
             public void onClick(View v) {
 
                 //get visible devices first, needs to be updated
+                //do something on NFD !!!!!
                 final String[] devices = {"王大傻","李二狗","蠢又笨"};
 
                 Intent intent = new Intent(MenuActivity.this, DeviceListActivity.class);
