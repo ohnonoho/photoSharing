@@ -6,20 +6,44 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class DeviceListActivity extends ActionBarActivity {
     final String TAG = "DeviceListActivity";
+
+    private ListView listView;
+    private List<String> deviceList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_list);
         Intent intent = getIntent();
         String[] devices = intent.getStringArrayExtra("devices");
-        int i ;
-        for (i = 0 ; i < devices.length ; i++)
-            Log.i(TAG, devices[i]);
+        deviceList = new ArrayList<String>();
+        int i = 0;
+        for (i = 0 ; i < devices.length ; i++){
+            deviceList.add(devices[i]);
+        }
+        listView = new ListView(this);
+        listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, deviceList));
+        setContentView(listView);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String deviceName = deviceList.get(position);
+                Intent intent = new Intent(DeviceListActivity.this, BrowsePhotosActivity.class);
+                intent.putExtra("deviceName", deviceName);
+                startActivity(intent);
+            }
+        });
     }
 
 

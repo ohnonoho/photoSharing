@@ -244,34 +244,4 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.e(TAG, "start onRestart~~~");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.e(TAG, "start onResume~~~");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.e(TAG, "start onPause~~~");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.e(TAG, "start onStop~~~");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.e(TAG, "start onDestroy~~~");
-    }
 }

@@ -5,6 +5,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -14,6 +15,11 @@ public class BrowsePhotosActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browse_photos);
+        Intent intent = getIntent();
+        //TextView tv = (TextView)findViewById(R.id.tmp);
+        //tv.setText(intent.getStringExtra("deviceName"));
+        // use the device name to retrive photos from the other device
+
     }
 
 
