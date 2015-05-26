@@ -51,6 +51,7 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
 
     String oAddress;
     String localIP;
+    boolean isOwner;
 
 
     private List peers = new ArrayList();
@@ -146,7 +147,7 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
         private ProducerActivityFragment fragment;
         // private String oAddress;
         // private String localIP;
-        private boolean isOwner;
+        // private boolean isOwner;
         private Face mFace;
 
         private String returnData = "No return data";
@@ -170,80 +171,80 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         if (!isOwner) {
                             localIP = getDottedDecimalIP(getLocalIPAddress());
                             //NFD nfd = new NFD();
-                            Thread thread = new Thread(new Runnable(){
-
-                                class RegisterTask extends AsyncTask<Void, Void, Integer> {
-
-                                    Nfdc nfdc = new Nfdc();
-                                    @Override
-                                    protected Integer doInBackground(Void... params) {
-                                        int mFaceID = 0;
-                                        try {
-                                            mFaceID = nfdc.faceCreate("udp://" + oAddress);
-                                            nfdc.ribRegisterPrefix(new Name("/test"), mFaceID, 10, true, false);
-                                            nfdc.ribRegisterPrefix(new Name("/test2"), mFaceID, 10, true, false);
-                                            nfdc.shutdown();
-                                        } catch(Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                        return mFaceID;
-                                    }
-
-                                }
-                                @Override
-                                public void run() {
-                                    try {
-                                        RegisterTask task = new RegisterTask();
-                                        task.execute();
-
-///////////////// //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//                                        Face face = new Face();
-//                                        ControlParametersMessage.Builder builder = ControlParametersMessage.newBuilder();
-//                                        builder.getControlParametersBuilder().setUri("udp4://" + oAddress + ":6363");
-//                                        ControlParametersProto.ControlParametersTypes.Name.Builder nameBuilder =
-//                                                builder.getControlParametersBuilder().getNameBuilder();
-//                                        Name prefix = new Name("/test");
-//                                        for (int i = 0; i < prefix.size(); ++i)
-//                                            nameBuilder.addComponent(ByteString.copyFrom(prefix.get(i).getValue().buf()));
-//                                        builder.getControlParametersBuilder().setFaceId(280);
-//                                        builder.getControlParametersBuilder().setOrigin(255);
-//                                        builder.getControlParametersBuilder().setCost(0);
-//                                        builder.getControlParametersBuilder().setFlags(1);
-//                                        Blob encodedControlParameters = ProtobufTlv.encode(builder.build());
+//                            Thread thread = new Thread(new Runnable(){
 //
-//                                        Interest interest = new Interest(new Name("/localhost/nfd/rib/register"));
-//                                        interest.getName().append(encodedControlParameters);
-//                                        interest.setInterestLifetimeMilliseconds(10000);
+//                                class RegisterTask extends AsyncTask<Void, Void, Integer> {
 //
-//                                        // Sign and express the interest.
-//                                        face.makeCommandInterest(interest);
+//                                    Nfdc nfdc = new Nfdc();
+//                                    @Override
+//                                    protected Integer doInBackground(Void... params) {
+//                                        int mFaceID = 0;
+//                                        try {
+//                                            mFaceID = nfdc.faceCreate("udp://" + oAddress);
+//                                            nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test"), mFaceID, 10, true, false);
+//                                            // nfdc.ribRegisterPrefix(new Name("/test2"), mFaceID, 10, true, false);
+//                                            nfdc.shutdown();
+//                                        } catch(Exception e) {
+//                                            e.printStackTrace();
+//                                        }
+//                                        return mFaceID;
+//                                    }
+//
+//                                }
+//                                @Override
+//                                public void run() {
+//                                    try {
+//                                        RegisterTask task = new RegisterTask();
+//                                        task.execute();
+//
+/////////////////// //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //
-//                                        face.expressInterest(interest,
-//                                                new OnData() {
-//                                                    @Override
-//                                                    public void onData(Interest interest, Data data) {
-//                                                        Log.i(ProducerActivity.TAG, interest.getName().toString());
-//                                                        Log.i(ProducerActivity.TAG, data.getContent().toString());
-//                                                        returnData = "Register Success";
-//                                                    }
-//                                                },
-//                                                new OnTimeout() {
-//                                                    @Override
-//                                                    public void onTimeout(Interest interest) {
-//                                                        Log.e(ProducerActivity.TAG, "Time out!!!!!!!!!!!");
-//                                                        returnData = "Register Failed";
-//                                                    }
-//                                                });
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-                            thread.run();
-                            Log.i(ProducerActivity.TAG, "register");
+////                                        Face face = new Face();
+////                                        ControlParametersMessage.Builder builder = ControlParametersMessage.newBuilder();
+////                                        builder.getControlParametersBuilder().setUri("udp4://" + oAddress + ":6363");
+////                                        ControlParametersProto.ControlParametersTypes.Name.Builder nameBuilder =
+////                                                builder.getControlParametersBuilder().getNameBuilder();
+////                                        Name prefix = new Name("/test");
+////                                        for (int i = 0; i < prefix.size(); ++i)
+////                                            nameBuilder.addComponent(ByteString.copyFrom(prefix.get(i).getValue().buf()));
+////                                        builder.getControlParametersBuilder().setFaceId(280);
+////                                        builder.getControlParametersBuilder().setOrigin(255);
+////                                        builder.getControlParametersBuilder().setCost(0);
+////                                        builder.getControlParametersBuilder().setFlags(1);
+////                                        Blob encodedControlParameters = ProtobufTlv.encode(builder.build());
+////
+////                                        Interest interest = new Interest(new Name("/localhost/nfd/rib/register"));
+////                                        interest.getName().append(encodedControlParameters);
+////                                        interest.setInterestLifetimeMilliseconds(10000);
+////
+////                                        // Sign and express the interest.
+////                                        face.makeCommandInterest(interest);
+////
+////
+////                                        face.expressInterest(interest,
+////                                                new OnData() {
+////                                                    @Override
+////                                                    public void onData(Interest interest, Data data) {
+////                                                        Log.i(ProducerActivity.TAG, interest.getName().toString());
+////                                                        Log.i(ProducerActivity.TAG, data.getContent().toString());
+////                                                        returnData = "Register Success";
+////                                                    }
+////                                                },
+////                                                new OnTimeout() {
+////                                                    @Override
+////                                                    public void onTimeout(Interest interest) {
+////                                                        Log.e(ProducerActivity.TAG, "Time out!!!!!!!!!!!");
+////                                                        returnData = "Register Failed";
+////                                                    }
+////                                                });
+//                                    } catch (Exception e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                            });
+//                            thread.run();
+//                            Log.i(ProducerActivity.TAG, "register");
 
                         } else {
                             Log.i(ProducerActivity.TAG, "i'm not the owner");

@@ -124,4 +124,12 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     public String getIPAddress() {
         return mReceiver.localIP;
     }
+
+    public boolean isOwner() {
+        return mReceiver.isOwner;
+    }
+
+    public String getOwnerIPAddress() {
+        return mReceiver.oAddress;
+    }
 }

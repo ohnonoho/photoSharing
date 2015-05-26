@@ -4,5 +4,7 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_producer">ProducerActivity</string>
     <string name="button_produce">Produce</string>
-    <string name="button_require">Require</string>
+    <string name="button_require1">/test1</string>
+    <string name="button_require2">/test2</string>
+    <string name="button_sync">Sync</string>
 </resources>

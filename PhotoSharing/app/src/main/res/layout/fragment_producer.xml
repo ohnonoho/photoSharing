@@ -33,10 +33,22 @@
             android:text="@string/button_produce"/>
 
         <Button
-            android:id="@+id/require_button"
+            android:id="@+id/require_button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/button_require"/>
+            android:text="@string/button_require1"/>
+
+        <Button
+            android:id="@+id/require_button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_require2"/>
+
+        <Button
+            android:id="@+id/sync_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_sync"/>
 
         <TextView
             android:id="@+id/result_text"

@@ -64,8 +64,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
         this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.list_item, peers));
 
-        prefixMap.put("/test/1", "This is test data 1.");
-        prefixMap.put("/test/2", "This is test data 2.");
+        prefixMap.put("/test1", "This is test data 1.");
+        prefixMap.put("/test2", "This is test data 2.");
 
         Button btnProduce = (Button) mView.findViewById(R.id.produce_button);
         btnProduce.setOnClickListener(new View.OnClickListener() {
@@ -76,12 +76,32 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
             }
         });
 
-        Button btnRequire = (Button) mView.findViewById(R.id.require_button);
-        btnRequire.setOnClickListener(new View.OnClickListener() {
+        final Button btnRequire1 = (Button) mView.findViewById(R.id.require_button1);
+        btnRequire1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 RequestTask requestTask = new RequestTask();
-                requestTask.execute();
+                String prefix = btnRequire1.getText().toString();
+                requestTask.execute(prefix);
+            }
+        });
+
+        final Button btnRequire2 = (Button) mView.findViewById(R.id.require_button2);
+        btnRequire2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RequestTask requestTask = new RequestTask();
+                String prefix = btnRequire2.getText().toString();
+                requestTask.execute(prefix);
+            }
+        });
+
+        Button btnSync = (Button) mView.findViewById(R.id.sync_button);
+        btnSync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RegisterNDF registerTask = new RegisterNDF();
+                registerTask.execute();
             }
         });
         return mView;
@@ -209,6 +229,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
     private class ProduceTask extends AsyncTask<Void, Void, Void> {
 
+        private ArrayList<Face> mFaces = new ArrayList<Face>();
         private Face mFace;
         private String prefix;
 
@@ -224,17 +245,20 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 String myIP = ((ProducerActivity)getActivity()).getIPAddress();
 
                 for(String key : prefixMap.keySet()) {
+//                    mFace = new Face("localhost");
+//                    mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
                     prefix = key;
-                    mFace.registerPrefix(new Name("/" + myIP + key), new OnInterest() {
+                    mFace.registerPrefix(new Name(key), new OnInterest() {
                         @Override
                         public void onInterest(Name name, Interest interest, Transport transport, long l) {
                             Data data = new Data(interest.getName());
-                            data.setContent(new Blob(prefixMap.get(prefix)));
+                            prefix = interest.getName().toUri();
+                            data.setContent(new Blob(prefixMap.get(interest.getName().toUri())));
                             try {
                                 Log.i(ProduceTask.TAG, "The data has been send.");
                                 mFace.putData(data);
                             } catch(IOException e) {
-                                Log.e(ProduceTask.TAG, "Failed to send data");
+                                Log.e(ProduceTask.TAG, "Failed to send data" + interest.getName().toString());
                             }
                         }
                     }, new OnRegisterFailed() {
@@ -243,13 +267,14 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                             Log.e(ProduceTask.TAG, "Failed to register the data");
                         }
                     });
+                    // mFaces.add(mFace);
                 }
 
                 while(true) {
                     mFace.processEvents();
                 }
             } catch (Exception e){
-                Log.e(ProduceTask.TAG, e.toString());
+                Log.e(ProduceTask.TAG, e.toString() + " " + prefix);
             }
 
             return null;
@@ -258,7 +283,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private class RequestTask extends AsyncTask<Void, Void, String> {
+    private class RequestTask extends AsyncTask<String, Void, String> {
 
         private static final String TAG = "Request Task";
 
@@ -266,16 +291,20 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         private String receiveVal = "I have not received data";
         private boolean shouldStop = false;
         @Override
-        protected String doInBackground(Void... params) {
+        protected String doInBackground(String... params) {
+
+            if(params.length == 0)
+                return null;
 
             try {
+                Log.i(RequestTask.TAG, "Request for " + params[0]);
                 mFace = new Face("localhost");
                 KeyChain keyChain = buildTestKeyChain();
                 mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 
                 Log.i(RequestTask.TAG, "Send the request");
-
-                Interest interest = new Interest(new Name("/test"));
+                String oAddress = ((ProducerActivity)getActivity()).getOwnerIPAddress();
+                Interest interest = new Interest(new Name(params[0]));
                 interest.setInterestLifetimeMilliseconds(10000);
                 mFace.expressInterest(interest, new OnData() {
                     @Override
@@ -292,26 +321,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                     }
                 });
 
-                // Test if we could register two prefix at the same time
-//                Interest interest2 = new Interest(new Name("/test2"));
-//                interest2.setInterestLifetimeMilliseconds(10000);
-//                mFace.expressInterest(interest2, new OnData() {
-//                    @Override
-//                    public void onData(Interest interest, Data data) {
-//                        Log.i(RequestTask.TAG, "The data2 has been received");
-//                        receiveVal = data.getContent().toString();
-//                        shouldStop = true;
-//                    }
-//                }, new OnTimeout() {
-//                    @Override
-//                    public void onTimeout(Interest interest) {
-//                        Log.e(RequestTask.TAG, "TimeOut!");
-//                        shouldStop = true;
-//                    }
-//                });
 
                 while(!shouldStop) {
-                    // Log.i(RequestTask.TAG, "Requiring For the Data");
                     mFace.processEvents();
                 }
             } catch (Exception e) {
@@ -339,5 +350,49 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
             keyChain.getIdentityManager().setDefaultIdentity(new Name("/test/identity"));
         }
         return keyChain;
+    }
+
+    private class RegisterNDF extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            Thread thread = new Thread(new Runnable(){
+
+                class RegisterTask extends AsyncTask<Void, Void, Integer> {
+
+                    String oAddress = ((ProducerActivity)getActivity()).getOwnerIPAddress();
+                    @Override
+                    protected Integer doInBackground(Void... params) {
+                        int mFaceID = 0;
+                        try {
+                            Nfdc nfdc = new Nfdc();
+                            mFaceID = nfdc.faceCreate("udp://" + oAddress);
+                            nfdc.ribRegisterPrefix(new Name("/test1"), mFaceID, 10, true, false);
+                            nfdc.ribRegisterPrefix(new Name("/test2"), mFaceID, 10, true, false);
+                            nfdc.shutdown();
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                        return mFaceID;
+                    }
+
+                }
+                @Override
+                public void run() {
+                    try {
+                        RegisterTask task = new RegisterTask();
+                        task.execute();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            thread.run();
+            Log.i(ProducerActivity.TAG, "register");
+
+            return null;
+        }
     }
 }
