@@ -53,6 +53,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
     // The map used to hold the prefix and the data
     HashMap<String, String> prefixMap = new HashMap<>();
+    HashMap<String, String> dataMap = new HashMap<>();
 
     public ProducerActivityFragment() {
     }
@@ -73,8 +74,11 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
             @Override
             public void onClick(View v) {
                 String localIP = ((ProducerActivity)getActivity()).getIPAddress();
-                prefixMap.put("/" + localIP + "/test1", "This is test data 1!");
-                prefixMap.put("/" + localIP + "/test2", "This is test data 2!");
+                // prefixMap.put("/" + localIP + "/test", "");
+                // prefixMap.put("/" + localIP + "/test1", "This is test data 1!");
+                dataMap.put("1", "This is test data 1!");
+                // prefixMap.put("/" + localIP + "/test2", "This is test data 2!");
+                dataMap.put("2", "This is test data 2!");
                 ProduceTask produceTask = new ProduceTask();
                 produceTask.execute();
             }
@@ -248,31 +252,54 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
                 String myIP = ((ProducerActivity)getActivity()).getIPAddress();
 
-                for(String key : prefixMap.keySet()) {
-//                    mFace = new Face("localhost");
-//                    mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
-                    prefix = key;
-                    mFace.registerPrefix(new Name(key), new OnInterest() {
-                        @Override
-                        public void onInterest(Name name, Interest interest, Transport transport, long l) {
-                            Data data = new Data(interest.getName());
-                            prefix = interest.getName().toUri();
-                            data.setContent(new Blob(prefixMap.get(interest.getName().toUri())));
-                            try {
-                                Log.i(ProduceTask.TAG, "The data has been send.");
-                                mFace.putData(data);
-                            } catch(IOException e) {
-                                Log.e(ProduceTask.TAG, "Failed to send data" + interest.getName().toString());
-                            }
+//                for(String key : prefixMap.keySet()) {
+////                    mFace = new Face("localhost");
+////                    mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
+//                    prefix = key;
+//                    mFace.registerPrefix(new Name(key), new OnInterest() {
+//                        @Override
+//                        public void onInterest(Name name, Interest interest, Transport transport, long l) {
+//                            Data data = new Data(interest.getName());
+//                            prefix = interest.getName().toUri();
+//                            data.setContent(new Blob(prefixMap.get(interest.getName().toUri())));
+//                            try {
+//                                Log.i(ProduceTask.TAG, "The data has been send.");
+//                                mFace.putData(data);
+//                            } catch(IOException e) {
+//                                Log.e(ProduceTask.TAG, "Failed to send data" + interest.getName().toString());
+//                            }
+//                        }
+//                    }, new OnRegisterFailed() {
+//                        @Override
+//                        public void onRegisterFailed(Name name) {
+//                            Log.e(ProduceTask.TAG, "Failed to register the data");
+//                        }
+//                    });
+//                    // mFaces.add(mFace);
+//                }
+
+                mFace.registerPrefix(new Name("/" + myIP + "/test"), new OnInterest() {
+                    @Override
+                    public void onInterest(Name name, Interest interest, Transport transport, long l) {
+                        Data data = new Data(interest.getName());
+                        // prefix = interest.getName().toUri();
+                        String component = interest.getName().get(2).toEscapedString();
+                        Log.i(ProduceTask.TAG, component);
+                        data.setContent(new Blob(dataMap.get(component)));
+                        try {
+                            Log.i(ProduceTask.TAG, "The data has been send." + component);
+                            mFace.putData(data);
+                        } catch(IOException e) {
+                            Log.e(ProduceTask.TAG, "Failed to send data" + interest.getName().toString());
                         }
-                    }, new OnRegisterFailed() {
-                        @Override
-                        public void onRegisterFailed(Name name) {
-                            Log.e(ProduceTask.TAG, "Failed to register the data");
-                        }
-                    });
-                    // mFaces.add(mFace);
-                }
+                    }
+                }, new OnRegisterFailed() {
+                    @Override
+                    public void onRegisterFailed(Name name) {
+                        Log.e(ProduceTask.TAG, "Failed to register the data");
+                    }
+                });
+
 
                 while(true) {
                     mFace.processEvents();
@@ -372,8 +399,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                         try {
                             Nfdc nfdc = new Nfdc();
                             mFaceID = nfdc.faceCreate("udp://" + oAddress);
-                            nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test1"), mFaceID, 10, true, false);
-                            nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test2"), mFaceID, 10, true, false);
+                            nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test"), mFaceID, 10, true, false);
+                            // nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test2"), mFaceID, 10, true, false);
                             nfdc.shutdown();
                         } catch(Exception e) {
                             e.printStackTrace();
