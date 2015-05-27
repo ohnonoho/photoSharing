@@ -44,7 +44,7 @@
             android:label="DiscoverableDevices" >
         </activity>
         <activity
-            android:name=".FinishActivity"
+            android:name=".ConfirmActivity"
             android:label="Confirmation" >
         </activity>
         <activity

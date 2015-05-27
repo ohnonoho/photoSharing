@@ -3,11 +3,9 @@ package com.example.photosharing;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -17,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.GridView;
@@ -138,11 +135,15 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
                 if (count == 0) {
                     //Log.e(TAG, "NO photo selected");
                     Toast.makeText(getApplicationContext(), "Please select at least one image", Toast.LENGTH_LONG).show();
+                    intent.putExtra("selectedPhotoPaths", selectedPhotoPaths.toArray(new String[selectedPhotoPaths.size()]));
+                    intent.setClass(CustomPhotoGalleryActivity.this, ConfirmActivity.class);
+                    //Log.e(TAG, "send intent to finishActivity");
+                    startActivity(intent);
                 }
                 else {
                     //Log.d("SelectedImages", selectedPhotoPaths);
                     intent.putExtra("selectedPhotoPaths", selectedPhotoPaths.toArray(new String[selectedPhotoPaths.size()]));
-                    intent.setClass(CustomPhotoGalleryActivity.this, FinishActivity.class);
+                    intent.setClass(CustomPhotoGalleryActivity.this, ConfirmActivity.class);
                     //Log.e(TAG, "send intent to finishActivity");
                     startActivity(intent);
                     //setResult(Activity.RESULT_OK, i);
