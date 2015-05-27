@@ -30,8 +30,8 @@
         </activity>
         <activity
             android:name=".MenuActivity"
-            android:label="PhotoSharing"
             android:icon="@drawable/icon"
+            android:label="PhotoSharing"
             android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,11 +49,15 @@
         </activity>
         <activity
             android:name=".BrowsePhotosActivity"
-            android:label="Others' Gallery" >
+            android:label="Others&apos; Gallery" >
         </activity>
         <activity
             android:name=".PhotoDetailsActivity"
             android:label="PhotoDetailsActivity" >
+        </activity>
+        <activity
+            android:name=".FinishActivity"
+            android:label="@string/title_activity_finish" >
         </activity>
     </application>
 

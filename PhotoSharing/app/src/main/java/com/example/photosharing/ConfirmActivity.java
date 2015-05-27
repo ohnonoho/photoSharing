@@ -10,24 +10,41 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Switch;
+import android.widget.TextView;
 
 
 public class ConfirmActivity extends ActionBarActivity {
     final String TAG="ConfirmActivity";
     private Button btnConfirm;
-    private Switch switchPrivacy;
+    private RadioGroup switchPrivacy;
     private ImageView hint;
     private boolean isPublic = true;
     private EditText passcode;
+    private TextView passcodeHint;
+    private String[] selectedPhotoPaths;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirm);
-        btnConfirm = (Button) this.findViewById(R.id.btnBackToMenu);
-        switchPrivacy = (Switch) this.findViewById(R.id.switchPrivacy);
+        btnConfirm = (Button) this.findViewById(R.id.btnConfirm);
+        switchPrivacy = (RadioGroup) this.findViewById(R.id.switchPrivacy);
         hint = (ImageView) this.findViewById(R.id.imghint);
+        passcodeHint = (TextView) this.findViewById(R.id.passcodeHint);
         passcode = (EditText) this.findViewById(R.id.passcode);
+
+        //get data from CustomPhotoGalleryActivity
+        //get selected photos
+        Intent intent = getIntent();
+        selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        Log.e(TAG, "LENGTH:" + selectedPhotoPaths.length);
+        //do something on NFD !!!!!
+        int i = 0;
+        for (i =0 ; i < selectedPhotoPaths.length; i ++){
+            Log.e(TAG, selectedPhotoPaths[i]);
+        }
 
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -36,30 +53,36 @@ public class ConfirmActivity extends ActionBarActivity {
                 //startActivity(intent);
             }
         });
-        Intent intent = getIntent();
-        String[] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
-        Log.e(TAG, "LENGTH:" + selectedPhotoPaths.length);
-        //do something on NFD !!!!!
-        int i = 0;
-        for (i =0 ; i < selectedPhotoPaths.length; i ++){
-            Log.e(TAG, selectedPhotoPaths[i]);
-        }
-        switchPrivacy.setOnClickListener(new View.OnClickListener() {
+
+        final RadioButton btnPub = (RadioButton) this.findViewById(R.id.rdbtnPublic);
+        switchPrivacy.check(btnPub.getId());
+        switchPrivacy.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+               if (checkedId == btnPub.getId()) {
+                   isPublic = true;
+                   hint.setBackground(getResources().getDrawable(R.drawable.imgpublichint));
+                   passcode.setVisibility(View.INVISIBLE);
+                   passcodeHint.setVisibility(View.INVISIBLE);
+               }
+               else {
+                   isPublic = false;
+                   hint.setBackground(getResources().getDrawable(R.drawable.imgprivatehint));
+                   passcode.setVisibility(View.VISIBLE);
+                   passcodeHint.setVisibility(View.VISIBLE);
+               }
+
+               // RadioButton radbtn = (RadioButton) findViewById(checkedId);
+            }
+        });
+
+        btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isPublic = !isPublic;
-                if (isPublic){
-                    switchPrivacy.setChecked(true);
-                    switchPrivacy.setText("Public ");
-                    hint.setBackground(getResources().getDrawable(R.drawable.imgpublichint));
-                    passcode.setVisibility(View.INVISIBLE);
-                }
-                else{
-                    switchPrivacy.setChecked(false);
-                    switchPrivacy.setText("Private");
-                    hint.setBackground(getResources().getDrawable(R.drawable.imgprivatehint));
-                    passcode.setVisibility(View.VISIBLE);
-                }
+                Intent intent = new Intent(ConfirmActivity.this, FinishActivity.class);
+                intent.putExtra("isPublic", isPublic);
+                intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
+                startActivity(intent);
             }
         });
     }

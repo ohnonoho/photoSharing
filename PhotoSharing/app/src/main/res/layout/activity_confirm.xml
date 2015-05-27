@@ -10,30 +10,58 @@
     <ImageView
     android:layout_width="720px"
     android:layout_height="80px"
-    android:background="@drawable/imgconfirmsettings"/>
+    android:background="@drawable/imgconfirmsettings"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginTop="@dimen/abc_text_size_display_1_material"/>
 
-    <Switch
+    <RadioGroup
         android:id="@+id/switchPrivacy"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Public"/>
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/abc_text_size_display_2_material" >
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rdbtnPublic"
+            android:text="Public" />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rdbtnPrivate"
+            android:text="Private " />
+    </RadioGroup>
 
     <ImageView
         android:id="@+id/imghint"
-        android:layout_width="720px"
-        android:layout_height="120px"
-        android:background="@drawable/imgpublichint"/>
+        android:layout_width="600px"
+        android:layout_height="100px"
+        android:background="@drawable/imgpublichint"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/abc_text_size_display_2_material"/>
+
+    <TextView
+        android:id="@+id/passcodeHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter passcode (e.g. 123)"
+        android:visibility="invisible"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/abc_text_size_display_1_material"/>
 
     <EditText
         android:id="@+id/passcode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:visibility="invisible"/>
 
     <Button
-        android:id="@+id/btnBackToMenu"
-        android:text="backToMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:id="@+id/btnConfirm"
+        android:layout_width="190px"
+        android:layout_height="100px"
+        android:background="@drawable/btnconfirm"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/abc_text_size_display_4_material"/>
 
 </LinearLayout>
