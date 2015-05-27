@@ -14,7 +14,7 @@ public class MenuActivity extends ActionBarActivity {
     private Button btnFindDevices;
     private Button btnGetPhotos;
     private Button btnSharePhotos;
-    public static boolean wifDirectConnected = false;
+    public static boolean wifiDirectConnected = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +50,9 @@ public class MenuActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 //send to wifi direct activity
+                Intent intent = new Intent(MenuActivity.this, ProducerActivity.class);
+                //startActivityForResult(intent);
+                startActivity(intent);
             }
         });
 
@@ -81,7 +84,8 @@ public class MenuActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (wifDirectConnected){
+        wifiDirectConnected = true;
+        if (wifiDirectConnected){
             btnGetPhotos.setEnabled(true);
             btnGetPhotos.setBackground(getResources().getDrawable(R.drawable.btnviewothersenable));
             btnSharePhotos.setEnabled(true);

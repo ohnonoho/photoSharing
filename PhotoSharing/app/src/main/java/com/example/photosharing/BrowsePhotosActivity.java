@@ -33,7 +33,8 @@ public class BrowsePhotosActivity extends ActionBarActivity {
         setContentView(R.layout.activity_browse_photos);
         Intent intent = getIntent();
         //TextView tv = (TextView)findViewById(R.id.tmp);
-        //tv.setText(intent.getStringExtra("deviceName"));
+        String deviceName = intent.getStringExtra("deviceName");
+        setTitle( deviceName +"'s Gallery");
 
         gridView = (GridView) findViewById(R.id.gridView);
         gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());

@@ -9,10 +9,4 @@
             android:layout_height="match_parent"
             tools:layout="@layout/fragment_producer" />
 
-        <fragment android:id="@+id/producer_select_photos_fragment"
-            android:name="com.example.photosharing.ProducerActivitySelectPhotosFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:layout="@layout/fragment_producer_activity_select_photos" />
-
 </RelativeLayout>

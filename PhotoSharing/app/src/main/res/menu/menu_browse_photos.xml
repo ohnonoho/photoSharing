@@ -4,5 +4,6 @@
     tools:context="com.example.photosharing.BrowsePhotosActivity">
 
     <item android:id="@+id/cancel" android:title="cancel"
-        android:orderInCategory="100" app:showAsAction="always" />
+        android:orderInCategory="100" app:showAsAction="always"
+        android:icon="@drawable/btncancel"/>
 </menu>

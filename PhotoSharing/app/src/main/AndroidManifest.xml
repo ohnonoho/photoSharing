@@ -26,11 +26,11 @@
         </activity>
         <activity
             android:name=".CustomPhotoGalleryActivity"
-            android:label="@string/title_activity_custom_photo_gallery" >
+            android:label="MyGallery" >
         </activity>
         <activity
             android:name=".MenuActivity"
-            android:label="@string/title_activity_menu"
+            android:label="PhotoSharing"
             android:icon="@drawable/icon"
             android:launchMode="singleTask" >
             <intent-filter>
@@ -41,19 +41,19 @@
         </activity>
         <activity
             android:name=".DeviceListActivity"
-            android:label="@string/title_activity_device_list" >
+            android:label="DiscoverableDevices" >
         </activity>
         <activity
             android:name=".FinishActivity"
-            android:label="@string/title_activity_finish" >
+            android:label="Confirmation" >
         </activity>
         <activity
             android:name=".BrowsePhotosActivity"
-            android:label="@string/title_activity_browse_photos" >
+            android:label="Others' Gallery" >
         </activity>
         <activity
             android:name=".PhotoDetailsActivity"
-            android:label="@string/title_activity_photo_details" >
+            android:label="PhotoDetailsActivity" >
         </activity>
     </application>
 

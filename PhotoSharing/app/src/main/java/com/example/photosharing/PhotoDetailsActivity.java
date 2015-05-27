@@ -1,10 +1,16 @@
 package com.example.photosharing;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,6 +30,38 @@ public class PhotoDetailsActivity extends ActionBarActivity {
 
         ImageView imageView = (ImageView) findViewById(R.id.image);
         imageView.setImageBitmap(bitmap);
+        imageView.setLongClickable(true);
+        // long press to save images
+        imageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(PhotoDetailsActivity.this);
+                alert.setMessage("Save the image to gallery?");
+                alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //do your work here
+                        //needs to be updated
+                        dialog.dismiss();
+//                        ContentValues values = new ContentValues();
+//                        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+//                        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+//                        //needs to be updated
+//                        values.put(MediaStore.MediaColumns.DATA, filePath);
+//                        context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                    }
+                });
+                alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }  );
+
+                alert.show();
+                return true;
+            }
+        });
     }
 
 
