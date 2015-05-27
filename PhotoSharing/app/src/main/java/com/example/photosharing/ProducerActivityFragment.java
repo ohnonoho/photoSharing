@@ -25,6 +25,7 @@ import java.net.InetAddress;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.named_data.jndn.Data;
@@ -35,7 +36,9 @@ import net.named_data.jndn.OnData;
 import net.named_data.jndn.OnInterest;
 import net.named_data.jndn.OnRegisterFailed;
 import net.named_data.jndn.OnTimeout;
-import net.named_data.jndn.security.KeyChain;
+import net.named_data.jndn.encoding.EncodingException;
+import net.named_data.jndn.security.*;
+import net.named_data.jndn.security.SecurityException;
 import net.named_data.jndn.security.identity.IdentityManager;
 import net.named_data.jndn.security.identity.MemoryIdentityStorage;
 import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
@@ -237,9 +240,9 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
     private class ProduceTask extends AsyncTask<Void, Void, Void> {
 
-        private ArrayList<Face> mFaces = new ArrayList<Face>();
         private Face mFace;
         private String prefix;
+        private ArrayList<String> prefixData = new ArrayList<>();
 
         private static final String TAG = "Produce Task";
 
@@ -251,6 +254,9 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 
                 String myIP = ((ProducerActivity)getActivity()).getIPAddress();
+
+                prefixData.add("This is test data1!");
+                prefixData.add("This is test data2!");
 
 //                for(String key : prefixMap.keySet()) {
 ////                    mFace = new Face("localhost");
@@ -281,18 +287,58 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 mFace.registerPrefix(new Name("/" + myIP + "/test"), new OnInterest() {
                     @Override
                     public void onInterest(Name name, Interest interest, Transport transport, long l) {
-                        Data data = new Data(interest.getName());
-                        // prefix = interest.getName().toUri();
-                        String component = interest.getName().get(2).toEscapedString();
-                        Log.i(ProduceTask.TAG, component);
-                        data.setContent(new Blob(dataMap.get(component)));
+//                        Data data = new Data(interest.getName());
+//                        // prefix = interest.getName().toUri();
+//                        String component = interest.getName().get(2).toEscapedString();
+//                        Log.i(ProduceTask.TAG, component);
+//                        data.setContent(new Blob(dataMap.get(component)));
+//                        try {
+//                            Log.i(ProduceTask.TAG, "The data has been send." + component);
+//                            mFace.putData(data);
+//                        } catch(IOException e) {
+//                            Log.e(ProduceTask.TAG, "Failed to send data" + interest.getName().toString());
+//                        }
+//                        Name requestName = new Name(interest.getName());
+//                        String component = requestName.get(2).toEscapedString();
+//                        requestName.appendSequenceNumber(1);
+//                        Log.i(ProduceTask.TAG, requestName.toUri());
+//                        Data data = new Data(requestName);
+//                        Log.i(ProduceTask.TAG, component);
+//                        data.setContent(new Blob("2"));
+//                        try {
+//                            mFace.putData(data);
+//                            for (int i = 2; i <= 3; i++) {
+//                                Name cName = new Name(interest.getName());
+//                                cName.appendSequenceNumber(i);
+//                                Data content = new Data(cName);
+//                                content.setContent(new Blob(dataMap.get(component)));
+//                                Log.i(ProduceTask.TAG, "Send out the data sequence " + cName.toUri());
+//                                mFace.putData(content);
+//                            }
+//                        } catch(IOException e) {
+//                            Log.e(ProduceTask.TAG, "Failed to send data");
+//                        }
                         try {
-                            Log.i(ProduceTask.TAG, "The data has been send." + component);
+                            Name requestName = interest.getName();
+                            String component = requestName.get(2).toEscapedString();
+                            int seqNo = (int)requestName.get(3).toSequenceNumber();
+                            Data data = new Data(requestName);
+                            if(seqNo == 1) {
+                                data.setContent(new Blob(""+prefixData.size()));
+                            }
+                            else {
+                                data.setContent(new Blob(prefixData.get(seqNo - 2)));
+                            }
                             mFace.putData(data);
-                        } catch(IOException e) {
-                            Log.e(ProduceTask.TAG, "Failed to send data" + interest.getName().toString());
+                            Log.i(ProduceTask.TAG, "Send out the data " + interest.getName().toUri());
+
+                        } catch(EncodingException e) {
+                            Log.e(ProduceTask.TAG, "Failed to encode");
+                        } catch (IOException e) {
+                            Log.e(ProduceTask.TAG, "Failed to send the data");
                         }
                     }
+
                 }, new OnRegisterFailed() {
                     @Override
                     public void onRegisterFailed(Name name) {
@@ -321,8 +367,11 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         private Face mFace;
         private String receiveVal = "I have not received data";
         private boolean shouldStop = false;
+        private HashMap<Integer, String> results = new HashMap<Integer, String>();
+        private int seqNumber = Integer.MAX_VALUE;
+        private KeyChain keyChain;
         @Override
-        protected String doInBackground(String... params) {
+        protected String doInBackground(final String... params) {
 
             if(params.length == 0)
                 return null;
@@ -330,19 +379,98 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
             try {
                 Log.i(RequestTask.TAG, "Request for " + params[0]);
                 mFace = new Face("localhost");
-                KeyChain keyChain = buildTestKeyChain();
+                keyChain = buildTestKeyChain();
                 mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 
-                String oAddress = ((ProducerActivity)getActivity()).getOwnerIPAddress();
+                final String oAddress = ((ProducerActivity)getActivity()).getOwnerIPAddress();
                 Log.i(RequestTask.TAG, "Send the request to" + oAddress);
-                Interest interest = new Interest(new Name("/" + oAddress + params[0]));
-                interest.setInterestLifetimeMilliseconds(10000);
+
+                Name requestName = new Name("/" + oAddress + params[0]);
+                requestName.appendSequenceNumber(1);
+                Interest interest = new Interest(requestName);
+                // Interest interest = new Interest(new Name("/" + oAddress + params[0]));
+                interest.setInterestLifetimeMilliseconds(100000);
                 mFace.expressInterest(interest, new OnData() {
                     @Override
                     public void onData(Interest interest, Data data) {
-                        Log.i(RequestTask.TAG, "The data has been received");
-                        receiveVal = data.getContent().toString();
-                        shouldStop = true;
+//                        Log.i(RequestTask.TAG, "The data has been received");
+//                        receiveVal = data.getContent().toString();
+//                        shouldStop = true;
+                        try {
+//                            Name respondName = data.getName();
+//                            int nameSize = respondName.size();
+//                            Log.i(RequestTask.TAG, String.valueOf(nameSize));
+//                            long seqNo = respondName.get(nameSize - 1).toSequenceNumber();
+//                            if(seqNo == 1) {
+//                                seqNumber = Long.parseLong(data.getContent().toString());
+//                            }
+//                            else {
+//                                results.put(seqNo - 1, data.getContent().toString());
+//                                Log.i(RequestTask.TAG, "" + results.keySet().size());
+//                                if(results.keySet().size() == seqNumber) {
+//                                    StringBuilder sb = new StringBuilder();
+//                                    for(long i = 1; i <= seqNumber; i++) {
+//                                        sb.append(results.get(i));
+//                                    }
+//                                    receiveVal = sb.toString();
+//                                    shouldStop = true;
+//                                }
+//                            }
+//                            Log.i(RequestTask.TAG, "" + seqNumber);
+                            Log.i(RequestTask.TAG, data.getName().toUri());
+                            seqNumber = Integer.parseInt(data.getContent().toString());
+                            for(int i = 2; i < 2+seqNumber; i++) {
+                                shouldStop = false;
+                                Log.i(RequestTask.TAG, "Request for data sequence " + i);
+                                Face contentFace = new Face("localhost");
+                                contentFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
+
+                                Name contentName = new Name("/" + oAddress + params[0]);
+                                contentName.appendSequenceNumber(i);
+                                Interest cInterest = new Interest(contentName);
+                                cInterest.setInterestLifetimeMilliseconds(10000);
+                                contentFace.expressInterest(cInterest, new OnData() {
+                                    @Override
+                                    public void onData(Interest interest, Data data) {
+                                        try {
+                                            Name dName = data.getName();
+                                            int size = dName.size();
+                                            int seqNo = (int) dName.get(size - 1).toSequenceNumber();
+                                            String content = data.getContent().toString();
+                                            results.put(seqNo, content);
+                                            Log.i(RequestTask.TAG, "" + results.keySet().size());
+                                            Log.i(RequestTask.TAG, "" + content);
+                                            shouldStop = true;
+                                        } catch(EncodingException e) {
+                                            Log.i(RequestTask.TAG, data.getName().toUri());
+                                            Log.e(RequestTask.TAG, "Encoding Failed " + seqNumber);
+                                        }
+                                    }
+                                }, new OnTimeout() {
+                                    @Override
+                                    public void onTimeout(Interest interest) {
+                                        Log.e(RequestTask.TAG, "Time Out During Retriving Data");
+                                        shouldStop = true;
+                                    }
+                                });
+
+                                while(!shouldStop) {
+                                    contentFace.processEvents();
+                                }
+                            }
+                        } catch (SecurityException e) {
+                            Log.e(RequestTask.TAG, "Security Failed " + seqNumber);
+                        } catch (IOException e) {
+                            Log.e(RequestTask.TAG, "IO Exception");
+                        } catch (EncodingException e) {
+                            Log.e(RequestTask.TAG, "Encoding Failed");
+                        }
+
+                        StringBuffer sb = new StringBuffer();
+                        for(int i = 2; i < 2 + seqNumber; i++) {
+                            sb.append(results.get(i));
+                        }
+                        receiveVal = sb.toString();
                     }
                 }, new OnTimeout() {
                     @Override
@@ -351,7 +479,6 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                         shouldStop = true;
                     }
                 });
-
 
                 while(!shouldStop) {
                     mFace.processEvents();
