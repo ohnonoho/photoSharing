@@ -16,21 +16,21 @@
 
     <Button
         android:id="@+id/btnGetPhotos"
-        android:layout_width="624px"
-        android:layout_height="200px"
+        android:layout_width="234dp"
+        android:layout_height="75dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/abc_text_size_display_4_material"/>
     <Button
         android:id="@+id/btnSharePhotos"
-        android:layout_width="624px"
-        android:layout_height="200px"
+        android:layout_width="234dp"
+        android:layout_height="75dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/abc_text_size_display_3_material"/>
 
     <Button
         android:id="@+id/btnFindDevices"
-        android:layout_width="624px"
-        android:layout_height="200px"
+        android:layout_width="156dp"
+        android:layout_height="50dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/abc_text_size_display_4_material"
         android:background="@drawable/btnfinddevices"/>

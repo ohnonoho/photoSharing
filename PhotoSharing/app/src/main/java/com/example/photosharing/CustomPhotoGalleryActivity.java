@@ -135,10 +135,6 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
                 if (count == 0) {
                     //Log.e(TAG, "NO photo selected");
                     Toast.makeText(getApplicationContext(), "Please select at least one image", Toast.LENGTH_LONG).show();
-                    intent.putExtra("selectedPhotoPaths", selectedPhotoPaths.toArray(new String[selectedPhotoPaths.size()]));
-                    intent.setClass(CustomPhotoGalleryActivity.this, ConfirmActivity.class);
-                    //Log.e(TAG, "send intent to finishActivity");
-                    startActivity(intent);
                 }
                 else {
                     //Log.d("SelectedImages", selectedPhotoPaths);

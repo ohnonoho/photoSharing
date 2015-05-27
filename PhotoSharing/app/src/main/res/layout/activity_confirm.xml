@@ -8,8 +8,8 @@
     tools:context="com.example.photosharing.ConfirmActivity">
 
     <ImageView
-    android:layout_width="720px"
-    android:layout_height="80px"
+    android:layout_width="312dp"
+    android:layout_height="35dp"
     android:background="@drawable/imgconfirmsettings"
     android:layout_gravity="center_horizontal"
     android:layout_marginTop="@dimen/abc_text_size_display_1_material"/>
@@ -34,8 +34,8 @@
 
     <ImageView
         android:id="@+id/imghint"
-        android:layout_width="600px"
-        android:layout_height="100px"
+        android:layout_width="258dp"
+        android:layout_height="43dp"
         android:background="@drawable/imgpublichint"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/abc_text_size_display_2_material"/>
@@ -54,14 +54,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:visibility="invisible"/>
+        android:visibility="invisible"
+        android:maxLines="1"
+        android:inputType="text|textNoSuggestions"/>
 
     <Button
         android:id="@+id/btnConfirm"
-        android:layout_width="190px"
-        android:layout_height="100px"
+        android:layout_width="82dp"
+        android:layout_height="43dp"
         android:background="@drawable/btnconfirm"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/abc_text_size_display_4_material"/>
+        android:layout_marginTop="@dimen/abc_text_size_display_2_material"/>
 
 </LinearLayout>

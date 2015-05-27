@@ -8,23 +8,23 @@
     android:orientation="vertical">
 
     <ImageView
-        android:layout_width="720px"
-        android:layout_height="180px"
+        android:layout_width="312dp"
+        android:layout_height="78dp"
         android:background="@drawable/imgconfirmmsg"
         android:layout_marginTop="@dimen/abc_text_size_display_3_material"
         android:layout_gravity="center_horizontal"/>
     <ImageView
-        android:layout_width="300px"
-        android:layout_height="300px"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
         android:background="@drawable/imgsmile"
         android:layout_gravity="center_horizontal"
         />
     <Button
         android:id="@+id/btnMenu"
-        android:layout_width="190px"
-        android:layout_height="100px"
+        android:layout_width="82dp"
+        android:layout_height="43dp"
         android:background="@drawable/btnmenu"
-        android:layout_marginTop="302dp"
+        android:layout_marginTop="112dp"
         android:layout_gravity="center_horizontal"/>
 
 </LinearLayout>

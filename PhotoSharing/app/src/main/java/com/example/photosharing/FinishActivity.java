@@ -10,15 +10,15 @@ import android.widget.Button;
 
 
 public class FinishActivity extends ActionBarActivity {
-    private Button btnConfirm;
+    private Button btnMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_finish);
 
-        btnConfirm = (Button) this.findViewById(R.id.btnConfirm);
-        btnConfirm.setOnClickListener(new View.OnClickListener() {
+        btnMenu = (Button) this.findViewById(R.id.btnMenu);
+        btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(FinishActivity.this, MenuActivity.class);
