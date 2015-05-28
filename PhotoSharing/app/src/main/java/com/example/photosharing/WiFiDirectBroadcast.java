@@ -13,13 +13,21 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 
+import com.google.protobuf.ByteString;
 import com.intel.jndn.management.NFD;
 
+import com.example.photosharing.ControlParametersProto.ControlParametersTypes.ControlParametersMessage;
 import net.named_data.jndn.ControlParameters;
+import net.named_data.jndn.Data;
 import net.named_data.jndn.Face;
+import net.named_data.jndn.Interest;
 import net.named_data.jndn.Name;
+import net.named_data.jndn.OnData;
+import net.named_data.jndn.OnTimeout;
+import net.named_data.jndn.encoding.ProtobufTlv;
 import net.named_data.jndn.security.KeyChain;
 import net.named_data.jndn.ForwardingFlags;
+import net.named_data.jndn.util.Blob;
 
 import java.net.Inet4Address;
 
@@ -40,6 +48,11 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
     private WifiP2pManager mManager;
     private WifiP2pManager.Channel mChannel;
     private ProducerActivity mProducerActivity;
+
+    String oAddress;
+    String localIP;
+    boolean isOwner;
+
 
     private List peers = new ArrayList();
 
@@ -110,9 +123,9 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                 }
             }
         } catch (SocketException ex) {
-            Log.e("AndroidNetworkAddressFactory", "getLocalIPAddress()", ex);
+            Log.e(ProducerActivity.TAG, "getLocalIPAddress()", ex);
         } catch (NullPointerException ex) {
-            Log.e("AndroidNetworkAddressFactory", "getLocalIPAddress()", ex);
+            Log.e(ProducerActivity.TAG, "getLocalIPAddress()", ex);
         }
         return null;
     }
@@ -129,17 +142,15 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
         return ipAddrStr;
     }
 
-
-
-
     private class RequestOwner extends AsyncTask<Void, Void, Void> {
         private InetAddress groupOwnerAddress;
         private ProducerActivityFragment fragment;
-        private String oAddress;
-        private String localIP;
-        private boolean isOwner;
+        // private String oAddress;
+        // private String localIP;
+        // private boolean isOwner;
         private Face mFace;
-        private int faceId;
+
+        private String returnData = "No return data";
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -160,36 +171,80 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         if (!isOwner) {
                             localIP = getDottedDecimalIP(getLocalIPAddress());
                             //NFD nfd = new NFD();
-                            Thread thread = new Thread(new Runnable(){
-                                @Override
-                                public void run() {
-                                    try {
-                                        faceId = NFD.createFace(mFace, "udp://" + oAddress);
-                                        NFD.register(mFace, faceId, new Name("/test"), 1);
-                                        ForwardingFlags flags = new ForwardingFlags();
-                                        flags.setChildInherit(true);
-                                        flags.setCapture(false);
-//                                        NFD.register(mFace,
-//                                                new ControlParameters()
-//                                                        .setName(new Name("/test"))
-//                                                        .setFaceId(faceId)
-//                                                        .setCost(1)
-//                                                        .setForwardingFlags(flags));
-//                                        NFD.register(mFace,
-//                                                "udp://" + oAddress,
-//                                                new Name("/test"),
-//                                                10);
-                                        //Your code goes here
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-                            //NFD nfd = new NFD();
-                            // Face m2 = new Face();
-                            //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 1);
-                            //NFD.register(mFace, "udp://" + oAddress, new Name("/test"), 10);
-                            Log.i(ProducerActivity.TAG, "register");
+//                            Thread thread = new Thread(new Runnable(){
+//
+//                                class RegisterTask extends AsyncTask<Void, Void, Integer> {
+//
+//                                    Nfdc nfdc = new Nfdc();
+//                                    @Override
+//                                    protected Integer doInBackground(Void... params) {
+//                                        int mFaceID = 0;
+//                                        try {
+//                                            mFaceID = nfdc.faceCreate("udp://" + oAddress);
+//                                            nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test"), mFaceID, 10, true, false);
+//                                            // nfdc.ribRegisterPrefix(new Name("/test2"), mFaceID, 10, true, false);
+//                                            nfdc.shutdown();
+//                                        } catch(Exception e) {
+//                                            e.printStackTrace();
+//                                        }
+//                                        return mFaceID;
+//                                    }
+//
+//                                }
+//                                @Override
+//                                public void run() {
+//                                    try {
+//                                        RegisterTask task = new RegisterTask();
+//                                        task.execute();
+//
+/////////////////// //////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+////                                        Face face = new Face();
+////                                        ControlParametersMessage.Builder builder = ControlParametersMessage.newBuilder();
+////                                        builder.getControlParametersBuilder().setUri("udp4://" + oAddress + ":6363");
+////                                        ControlParametersProto.ControlParametersTypes.Name.Builder nameBuilder =
+////                                                builder.getControlParametersBuilder().getNameBuilder();
+////                                        Name prefix = new Name("/test");
+////                                        for (int i = 0; i < prefix.size(); ++i)
+////                                            nameBuilder.addComponent(ByteString.copyFrom(prefix.get(i).getValue().buf()));
+////                                        builder.getControlParametersBuilder().setFaceId(280);
+////                                        builder.getControlParametersBuilder().setOrigin(255);
+////                                        builder.getControlParametersBuilder().setCost(0);
+////                                        builder.getControlParametersBuilder().setFlags(1);
+////                                        Blob encodedControlParameters = ProtobufTlv.encode(builder.build());
+////
+////                                        Interest interest = new Interest(new Name("/localhost/nfd/rib/register"));
+////                                        interest.getName().append(encodedControlParameters);
+////                                        interest.setInterestLifetimeMilliseconds(10000);
+////
+////                                        // Sign and express the interest.
+////                                        face.makeCommandInterest(interest);
+////
+////
+////                                        face.expressInterest(interest,
+////                                                new OnData() {
+////                                                    @Override
+////                                                    public void onData(Interest interest, Data data) {
+////                                                        Log.i(ProducerActivity.TAG, interest.getName().toString());
+////                                                        Log.i(ProducerActivity.TAG, data.getContent().toString());
+////                                                        returnData = "Register Success";
+////                                                    }
+////                                                },
+////                                                new OnTimeout() {
+////                                                    @Override
+////                                                    public void onTimeout(Interest interest) {
+////                                                        Log.e(ProducerActivity.TAG, "Time out!!!!!!!!!!!");
+////                                                        returnData = "Register Failed";
+////                                                    }
+////                                                });
+//                                    } catch (Exception e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                            });
+//                            thread.run();
+//                            Log.i(ProducerActivity.TAG, "register");
 
                         } else {
                             Log.i(ProducerActivity.TAG, "i'm not the owner");
@@ -197,7 +252,9 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         }
                         Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
                         Log.i(ProducerActivity.TAG, "My Address:" + localIP);
+                        Log.i(ProducerActivity.TAG, "Register status: " + returnData);
                         fragment.updateGroupOwner(isOwner, oAddress);
+
 
                         fragment.updateMyAddress(localIP);
 

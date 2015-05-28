@@ -57,24 +57,6 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
         mReceiver = new WiFiDirectBroadcast(mManager, mChannel, this);
 
         Log.d(this.TAG, "Start to discover peers");
-
-        //
-//        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-//
-//            @Override
-//            public void onSuccess() {
-//                Toast.makeText(ProducerActivity.this, "Discovery Initiated", Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onFailure(int reason) {
-//                Toast.makeText(ProducerActivity.this, "Discovery Failed" + reason, Toast.LENGTH_SHORT).show();
-//            }
-//        });
-
-        //StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-        //StrictMode.setThreadPolicy(policy);
     }
 
 
@@ -138,5 +120,17 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
                 Toast.makeText(ProducerActivity.this, "Connect failed.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public String getIPAddress() {
+        return mReceiver.localIP;
+    }
+
+    public boolean isOwner() {
+        return mReceiver.isOwner;
+    }
+
+    public String getOwnerIPAddress() {
+        return mReceiver.oAddress;
     }
 }
