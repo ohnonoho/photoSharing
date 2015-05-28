@@ -16,7 +16,6 @@ import android.util.Log;
 import com.google.protobuf.ByteString;
 import com.intel.jndn.management.NFD;
 
-import com.example.photosharing.ControlParametersProto.ControlParametersTypes.ControlParametersMessage;
 import net.named_data.jndn.ControlParameters;
 import net.named_data.jndn.Data;
 import net.named_data.jndn.Face;
