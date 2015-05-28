@@ -12,6 +12,9 @@
         android:name="android.permission.INTERNET"
         android:required="true" />
 
+    <!-- in order to access user's gallery -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,14 +22,42 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".ProducerActivity"
-            android:label="@string/title_activity_producer"
-            android:launchMode="singleTask">
+            android:label="@string/title_activity_producer" >
+        </activity>
+        <activity
+            android:name=".CustomPhotoGalleryActivity"
+            android:label="MyGallery" >
+        </activity>
+        <activity
+            android:name=".MenuActivity"
+            android:icon="@drawable/icon"
+            android:label="PhotoSharing"
+            android:launchMode="singleTask" >
             <intent-filter>
-                <action
-                    android:name="android.intent.action.MAIN" />
-                <category
-                    android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".DeviceListActivity"
+            android:label="DiscoverableDevices" >
+        </activity>
+        <activity
+            android:name=".ConfirmActivity"
+            android:label="Confirmation" >
+        </activity>
+        <activity
+            android:name=".BrowsePhotosActivity"
+            android:label="Others&apos; Gallery" >
+        </activity>
+        <activity
+            android:name=".PhotoDetailsActivity"
+            android:label="PhotoDetailsActivity" >
+        </activity>
+        <activity
+            android:name=".FinishActivity"
+            android:label="@string/title_activity_finish" >
         </activity>
     </application>
 

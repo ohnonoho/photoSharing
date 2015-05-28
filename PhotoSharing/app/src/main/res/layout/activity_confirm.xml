@@ -1,0 +1,69 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="com.example.photosharing.ConfirmActivity">
+
+    <ImageView
+    android:layout_width="312dp"
+    android:layout_height="35dp"
+    android:background="@drawable/imgconfirmsettings"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginTop="@dimen/abc_text_size_display_1_material"/>
+
+    <RadioGroup
+        android:id="@+id/switchPrivacy"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/abc_text_size_display_2_material" >
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rdbtnPublic"
+            android:text="Public" />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rdbtnPrivate"
+            android:text="Private " />
+    </RadioGroup>
+
+    <ImageView
+        android:id="@+id/imghint"
+        android:layout_width="258dp"
+        android:layout_height="43dp"
+        android:background="@drawable/imgpublichint"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/abc_text_size_display_2_material"/>
+
+    <TextView
+        android:id="@+id/passcodeHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter passcode (e.g. 123)"
+        android:visibility="invisible"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/abc_text_size_display_1_material"/>
+
+    <EditText
+        android:id="@+id/passcode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="invisible"
+        android:maxLength="6"
+        android:maxLines="1"/>
+
+    <Button
+        android:id="@+id/btnConfirm"
+        android:layout_width="82dp"
+        android:layout_height="43dp"
+        android:background="@drawable/btnconfirm"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/abc_text_size_display_2_material"/>
+
+</LinearLayout>
