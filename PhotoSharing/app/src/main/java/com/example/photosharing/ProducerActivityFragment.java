@@ -2,6 +2,10 @@ package com.example.photosharing;
 
 import android.app.ListFragment;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -10,16 +14,20 @@ import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.security.Key;
@@ -79,9 +87,9 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 String localIP = ((ProducerActivity)getActivity()).getIPAddress();
                 // prefixMap.put("/" + localIP + "/test", "");
                 // prefixMap.put("/" + localIP + "/test1", "This is test data 1!");
-                dataMap.put("1", "This is test data 1!");
+                // dataMap.put("1", "This is test data 1!");
                 // prefixMap.put("/" + localIP + "/test2", "This is test data 2!");
-                dataMap.put("2", "This is test data 2!");
+                // dataMap.put("2", "This is test data 2!");
                 ProduceTask produceTask = new ProduceTask();
                 produceTask.execute();
             }
@@ -255,8 +263,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
                 String myIP = ((ProducerActivity)getActivity()).getIPAddress();
 
-                prefixData.add("This is test data1!");
-                prefixData.add("This is test data2!");
+                // prefixData.add("This is test data1!");
+                // prefixData.add("This is test data2!");
 
 //                for(String key : prefixMap.keySet()) {
 ////                    mFace = new Face("localhost");
@@ -319,10 +327,28 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 //                            Log.e(ProduceTask.TAG, "Failed to send data");
 //                        }
                         try {
+                            prefixData.clear();
                             Name requestName = interest.getName();
                             String component = requestName.get(2).toEscapedString();
                             int seqNo = (int)requestName.get(3).toSequenceNumber();
                             Data data = new Data(requestName);
+
+                            // Read in the image here
+                            Drawable d = getActivity().getResources().getDrawable(R.drawable.py6);
+                            Bitmap bitmap = ((BitmapDrawable)d).getBitmap();
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                            byte[] bitmapdata = stream.toByteArray();
+                            String content = Base64.encodeToString(bitmapdata, Base64.DEFAULT);
+
+                            // Split the data
+                            int fixLength = 8000;
+                            int cnt = (content.length() / fixLength) + 1;
+
+                            for(int i = 0; i < cnt; i++) {
+                                prefixData.add(content.substring(i*fixLength, Math.min((i+1)*fixLength, content.length())));
+                            }
+
                             if(seqNo == 1) {
                                 data.setContent(new Blob(""+prefixData.size()));
                             }
@@ -370,6 +396,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         private HashMap<Integer, String> results = new HashMap<Integer, String>();
         private int seqNumber = Integer.MAX_VALUE;
         private KeyChain keyChain;
+        private byte[] bitmapdata = new byte[0];
         @Override
         protected String doInBackground(final String... params) {
 
@@ -388,14 +415,10 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 Name requestName = new Name("/" + oAddress + params[0]);
                 requestName.appendSequenceNumber(1);
                 Interest interest = new Interest(requestName);
-                // Interest interest = new Interest(new Name("/" + oAddress + params[0]));
                 interest.setInterestLifetimeMilliseconds(100000);
                 mFace.expressInterest(interest, new OnData() {
                     @Override
                     public void onData(Interest interest, Data data) {
-//                        Log.i(RequestTask.TAG, "The data has been received");
-//                        receiveVal = data.getContent().toString();
-//                        shouldStop = true;
                         try {
 //                            Name respondName = data.getName();
 //                            int nameSize = respondName.size();
@@ -419,10 +442,12 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 //                            Log.i(RequestTask.TAG, "" + seqNumber);
                             Log.i(RequestTask.TAG, data.getName().toUri());
                             seqNumber = Integer.parseInt(data.getContent().toString());
+                            Log.i(RequestTask.TAG, "" + seqNumber);
+                            Face contentFace = new Face("localhost");
                             for(int i = 2; i < 2+seqNumber; i++) {
                                 shouldStop = false;
                                 Log.i(RequestTask.TAG, "Request for data sequence " + i);
-                                Face contentFace = new Face("localhost");
+                                // Face contentFace = new Face("localhost");
                                 contentFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 
                                 Name contentName = new Name("/" + oAddress + params[0]);
@@ -439,7 +464,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                                             String content = data.getContent().toString();
                                             results.put(seqNo, content);
                                             Log.i(RequestTask.TAG, "" + results.keySet().size());
-                                            Log.i(RequestTask.TAG, "" + content);
+                                            // Log.i(RequestTask.TAG, "" + content);
                                             shouldStop = true;
                                         } catch(EncodingException e) {
                                             Log.i(RequestTask.TAG, data.getName().toUri());
@@ -470,7 +495,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                         for(int i = 2; i < 2 + seqNumber; i++) {
                             sb.append(results.get(i));
                         }
-                        receiveVal = sb.toString();
+                        // receiveVal = sb.toString();
+                        bitmapdata = Base64.decode(sb.toString(), Base64.DEFAULT);
                     }
                 }, new OnTimeout() {
                     @Override
@@ -491,8 +517,11 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
         @Override
         protected void onPostExecute(String s) {
-            TextView view = (TextView)mView.findViewById(R.id.result_text);
-            view.setText(s);
+            // TextView view = (TextView)mView.findViewById(R.id.result_text);
+            // view.setText(s);
+            Drawable image = new BitmapDrawable(BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length));
+            ImageView view = (ImageView)mView.findViewById(R.id.picture);
+            view.setImageDrawable(image);
         }
     }
 
@@ -527,7 +556,6 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                             Nfdc nfdc = new Nfdc();
                             mFaceID = nfdc.faceCreate("udp://" + oAddress);
                             nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test"), mFaceID, 10, true, false);
-                            // nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test2"), mFaceID, 10, true, false);
                             nfdc.shutdown();
                         } catch(Exception e) {
                             e.printStackTrace();
