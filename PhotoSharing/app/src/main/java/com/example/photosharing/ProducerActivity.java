@@ -38,6 +38,7 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_producer);
+        //setContentView(R.layout.activity_producer);
 
         // Indicate a change in the Wi-Fi P2P status
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
