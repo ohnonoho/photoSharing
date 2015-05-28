@@ -59,6 +59,10 @@
             android:name=".FinishActivity"
             android:label="@string/title_activity_finish" >
         </activity>
+
+        <service
+            android:name=".ProducerService"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -2,6 +2,7 @@ package com.example.photosharing;
 
 import android.app.ListFragment;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -90,8 +91,11 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 // dataMap.put("1", "This is test data 1!");
                 // prefixMap.put("/" + localIP + "/test2", "This is test data 2!");
                 // dataMap.put("2", "This is test data 2!");
-                ProduceTask produceTask = new ProduceTask();
-                produceTask.execute();
+                // ProduceTask produceTask = new ProduceTask();
+                // produceTask.execute();
+                Intent intent = new Intent(getActivity(), ProducerService.class);
+                intent.putExtra("IP", ((ProducerActivity) getActivity()).getIPAddress());
+                getActivity().startService(intent);
             }
         });
 
