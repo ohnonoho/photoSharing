@@ -24,6 +24,38 @@ public class PhotoSharingApplication extends Application {
         deviceList = new ArrayList<>();
     }
 
+    public void setMyAddress(String myAddress) {
+        this.myAddress = myAddress;
+    }
+
+    public String getMyAddress() {
+        return myAddress;
+    }
+
+    public void setMyDeviceName(String myDeviceName) {
+        this.myDeviceName = myDeviceName;
+    }
+
+    public String getMyDeviceName() {
+        return myDeviceName;
+    }
+
+    public void setOwnerAddress(String ownerAddress) {
+        this.ownerAddress = ownerAddress;
+    }
+
+    public String getOwnerAddress() {
+        return ownerAddress;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
     public ArrayList<DeviceInfo> getDeviceList(){
         return deviceList;
     }
