@@ -18,41 +18,49 @@ import java.util.List;
 
 public class DeviceListActivity extends ActionBarActivity {
     final String TAG = "DeviceListActivity";
+    final private PhotoSharingApplication app = (PhotoSharingApplication) getApplication();
 
     private ListView listView;
-    private List<String> deviceList;
+    private List<String> deviceDisplayList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_list);
         Intent intent = getIntent();
-        String[] devices = intent.getStringArrayExtra("devices");
-        deviceList = new ArrayList<String>();
-        int i = 0;
-        for (i = 0 ; i < devices.length ; i++){
-            deviceList.add(devices[i]);
-        }
-        listView = new ListView(this);
-        listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, deviceList));
-        setContentView(listView);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String deviceName = deviceList.get(position);
-                Intent intent = new Intent(DeviceListActivity.this, BrowsePhotosActivity.class);
-                intent.putExtra("deviceName", deviceName);
-                //get info from the device
-                // needs to be updated
-                intent.putExtra("isPublic", false);
-                intent.putExtra("picNum", 2);
-                String passcode = "";
-                if (passcode.equals(""))
-                    passcode = "123";
-                intent.putExtra("passcode", passcode);
+        //String[] devices = intent.getStringArrayExtra("devices");
+        final ArrayList<PhotoSharingApplication.DeviceInfo> deviceList = app.getDeviceList();
+        if ( deviceList.isEmpty() )
+            Toast.makeText(getApplicationContext(), "No device discoverable", Toast.LENGTH_LONG).show();
+        else {
 
-                startActivity(intent);
+            deviceDisplayList = new ArrayList<String>();// this is the array of string which is used by listview adapter
+            int i = 0;
+            for (i = 0; i < deviceList.size(); i++) {
+                deviceDisplayList.add(deviceList.get(i).ipAddress);
             }
-        });
+            listView = new ListView(this);
+            listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, deviceDisplayList));
+            setContentView(listView);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String targetIP = deviceDisplayList.get(position);
+                    Intent intent = new Intent(DeviceListActivity.this, BrowsePhotosActivity.class);
+                    intent.putExtra("deviceName", deviceList.get(position).deviceName);
+                    intent.putExtra("targetIP", targetIP);
+                    //get info from the device
+                    //do something on NFD !!!!!
+                    //get /target/info, isPublic, passcode
+                    intent.putExtra("isPublic", false);
+                    String passcode = "";
+                    if (passcode.equals(""))
+                        passcode = "123";
+                    intent.putExtra("passcode", passcode);
+
+                    startActivity(intent);
+                }
+            });
+        }
     }
 
 
