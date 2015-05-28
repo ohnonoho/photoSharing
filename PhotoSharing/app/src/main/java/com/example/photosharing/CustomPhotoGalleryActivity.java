@@ -33,6 +33,7 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
     boolean[] isChecked;
     String[] arrPath;
     int numTotalPhotos = 0;
+    private Cursor imagecursor;
 
 
     @Override
@@ -62,11 +63,10 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
         final ArrayList<ImageItem> imageItems = new ArrayList<>();
         final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID };
         final String orderBy = MediaStore.Images.Media._ID;
-        @SuppressWarnings("deprecation")
-        Cursor imagecursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
+        //@SuppressWarnings("deprecation")
+        imagecursor = managedQuery(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
         if (imagecursor == null){
             Log.i(TAG, "image cursor is null, indicates that there is no images");
-            imagecursor.close();
             return imageItems;
         }
         int image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
@@ -81,7 +81,6 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
             Bitmap image = BitmapFactory.decodeFile(arrPath[i], option);
             imageItems.add(new ImageItem(image, "Image#" + i));
         }
-        imagecursor.close();
 
         /*
         // use drawable photos to test
@@ -216,5 +215,12 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
             this.image = image;
             this.title = title;
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        imagecursor.close();
+        Log.v(TAG, "onStop");
     }
 }

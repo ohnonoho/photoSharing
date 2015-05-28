@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/etPasscode"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:minWidth="180dip" android:digits="1234567890" android:maxLength="6"
+        android:password="true"/>
+
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="horizontal"
+        android:layout_gravity="center_horizontal">
+        <Button android:id="@+id/Access"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Access"
+            android:layout_toLeftOf="@+id/centerPoint" />
+        <TextView
+            android:id="@+id/centerPoint"
+            android:layout_width="20dp"
+            android:layout_height="0dp"
+            android:layout_centerHorizontal="true" />
+        <Button android:id="@+id/Cancel" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:layout_toRightOf="@+id/centerPoint" />
+    </RelativeLayout>
+</LinearLayout>

@@ -55,8 +55,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:visibility="invisible"
-        android:maxLines="1"
-        android:inputType="text|textNoSuggestions"/>
+        android:maxLength="6"
+        android:maxLines="1"/>
 
     <Button
         android:id="@+id/btnConfirm"

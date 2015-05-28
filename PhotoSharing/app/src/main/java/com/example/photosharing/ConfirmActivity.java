@@ -38,6 +38,7 @@ public class ConfirmActivity extends ActionBarActivity {
         passcodeHint = (TextView) this.findViewById(R.id.passcodeHint);
         passcode = (EditText) this.findViewById(R.id.passcode);
         passcode.setText("");
+        passcode.setInputType(InputType.TYPE_CLASS_NUMBER);
 
         //get data from CustomPhotoGalleryActivity
         //get selected photos
@@ -79,13 +80,7 @@ public class ConfirmActivity extends ActionBarActivity {
                // RadioButton radbtn = (RadioButton) findViewById(checkedId);
             }
         });
-        passcode.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                passcode.setInputType(InputType.TYPE_NULL); //关闭软键盘
-                return false;
-            }
-        });
+
 
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override

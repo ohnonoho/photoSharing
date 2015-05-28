@@ -41,6 +41,15 @@ public class DeviceListActivity extends ActionBarActivity {
                 String deviceName = deviceList.get(position);
                 Intent intent = new Intent(DeviceListActivity.this, BrowsePhotosActivity.class);
                 intent.putExtra("deviceName", deviceName);
+                //get info from the device
+                // needs to be updated
+                intent.putExtra("isPublic", false);
+                intent.putExtra("picNum", 2);
+                String passcode = "";
+                if (passcode.equals(""))
+                    passcode = "123";
+                intent.putExtra("passcode", passcode);
+
                 startActivity(intent);
             }
         });
