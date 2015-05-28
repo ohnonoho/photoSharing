@@ -1,13 +1,8 @@
 package com.example.photosharing;
 
 import android.app.Application;
-import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Created by Zander on 2015/5/28.
@@ -22,6 +17,7 @@ public class PhotoSharingApplication extends Application {
     public void onCreate() {
         super.onCreate();
         deviceList = new ArrayList<>();
+        selectedPhotoPaths = new ArrayList<>();
     }
 
     public void setMyAddress(String myAddress) {
@@ -63,6 +59,10 @@ public class PhotoSharingApplication extends Application {
         DeviceInfo d = new DeviceInfo(address, name);
         deviceList.add(d);
     }
+    public void clearSelectedPhotoPaths(){
+        selectedPhotoPaths.clear();
+        selectedPhotoPaths = new ArrayList<>();
+    }
 
     public ArrayList<String> getSelectedPhotoPaths(){
         return selectedPhotoPaths;
@@ -71,10 +71,22 @@ public class PhotoSharingApplication extends Application {
         if (path != null)
             selectedPhotoPaths.add(path);
     }
+    public void clearDeviceList(){
+        deviceList.clear();
+        deviceList = new ArrayList<>();
+    }
+
+    public int getDeviceListLength(){
+        return deviceList.size();
+    }
+    public int getSelectedPhotoPathsLength(){
+        return selectedPhotoPaths.size();
+    }
+
 
     public class DeviceInfo{
-        String ipAddress;
-        String deviceName;
+        public String ipAddress;
+        public String deviceName;
 
         public DeviceInfo(){
 

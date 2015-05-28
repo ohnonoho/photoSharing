@@ -12,10 +12,24 @@ import android.widget.Button;
 public class FinishActivity extends ActionBarActivity {
     private Button btnMenu;
 
+    final private PhotoSharingApplication app = (PhotoSharingApplication) getApplication();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_finish);
+
+
+        Intent intent = getIntent();
+        boolean isPublic = intent.getBooleanExtra("isPublic", true);
+        String passcode = intent.getStringExtra("passcode");
+        String [] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        for (int i = 0 ; i < selectedPhotoPaths.length ; i++){
+            app.addSelectedPhoto(selectedPhotoPaths[i]);
+        }
+        //do something on NFD !!!!!
+        //update /ip/info
+        //register photos
 
         btnMenu = (Button) this.findViewById(R.id.btnMenu);
         btnMenu.setOnClickListener(new View.OnClickListener() {

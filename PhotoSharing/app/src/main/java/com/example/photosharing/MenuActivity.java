@@ -28,10 +28,12 @@ public class MenuActivity extends ActionBarActivity {
 
                 //get visible devices first, needs to be updated
                 //do something on NFD !!!!!
-                final String[] devices = {"王大傻","李二狗","蠢又笨"};
+                //get and update device list
+
+                //app.addDevice()
 
                 Intent intent = new Intent(MenuActivity.this, DeviceListActivity.class);
-                intent.putExtra("devices", devices);
+                //intent.putExtra("devices", devices);
                 startActivity(intent);
             }
         });

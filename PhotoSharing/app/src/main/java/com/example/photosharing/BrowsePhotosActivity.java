@@ -2,6 +2,7 @@ package com.example.photosharing;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -39,9 +40,8 @@ public class BrowsePhotosActivity extends ActionBarActivity {
 
     String deviceName;
     boolean isPublic;
-    int picNum;
     String passcode;
-    String photoPath;
+    String targetPhotoPrefix;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +51,11 @@ public class BrowsePhotosActivity extends ActionBarActivity {
         //TextView tv = (TextView)findViewById(R.id.tmp);
         deviceName = intent.getStringExtra("deviceName");
         isPublic = intent.getBooleanExtra("isPublic", true);
-        picNum = intent.getIntExtra("picNum", 1);
         passcode = intent.getStringExtra("passcode");
 
         // the cotent that someone is sharing is public
         if (isPublic ) {
-            photoPath = deviceName + "/public";
+            targetPhotoPrefix = deviceName + "/public";
             displayContent();
         }
         else{
@@ -79,7 +78,7 @@ public class BrowsePhotosActivity extends ActionBarActivity {
                         Toast.makeText(getApplicationContext(), "Incorrect passcode", Toast.LENGTH_SHORT).show();
                         dialog.show();
                     }else{
-                        photoPath = deviceName + "/" + passcode;
+                        targetPhotoPrefix = deviceName + "/" + passcode;
                         dialog.dismiss();
                         displayContent();
                     }
@@ -105,8 +104,8 @@ public class BrowsePhotosActivity extends ActionBarActivity {
     private ArrayList<ImageItem> getData() {
         // use the device name to retrive photos from the other device
         //do something on NFD !!!!!
-        //use photoPath to get photos
-        Log.e(TAG, "photoPath:" + photoPath);
+        //use targetPhotoPrefix to get photos
+        Log.e(TAG, "targetPhotoPrefix:" + targetPhotoPrefix);
         final ArrayList<ImageItem> imageItems = new ArrayList<>();
         TypedArray imgs = getResources().obtainTypedArray(R.array.image_ids);
         for (int i = 0; i < imgs.length(); i++) {

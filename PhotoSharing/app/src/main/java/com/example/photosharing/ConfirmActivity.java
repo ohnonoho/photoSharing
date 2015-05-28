@@ -28,6 +28,8 @@ public class ConfirmActivity extends ActionBarActivity {
     private EditText passcode;
     private TextView passcodeHint;
     private String[] selectedPhotoPaths;
+
+    final private PhotoSharingApplication app = (PhotoSharingApplication) getApplication();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,22 +44,15 @@ public class ConfirmActivity extends ActionBarActivity {
 
         //get data from CustomPhotoGalleryActivity
         //get selected photos
-        Intent intent = getIntent();
-        selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        //Intent intent = getIntent();
+        //String[] selectedPhotoPaths;
+        selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getSelectedPhotoPathsLength()]);
         Log.e(TAG, "LENGTH:" + selectedPhotoPaths.length);
-        //do something on NFD !!!!!
+
         int i = 0;
         for (i =0 ; i < selectedPhotoPaths.length; i ++){
             Log.e(TAG, selectedPhotoPaths[i]);
         }
-
-        btnConfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Intent intent = new Intent(ConfirmActivity.this, FinishActivity.class);
-                //startActivity(intent);
-            }
-        });
 
         final RadioButton btnPub = (RadioButton) this.findViewById(R.id.rdbtnPublic);
         switchPrivacy.check(btnPub.getId());
@@ -88,7 +83,7 @@ public class ConfirmActivity extends ActionBarActivity {
                 if (isPublic){
                     Intent intent = new Intent(ConfirmActivity.this, FinishActivity.class);
                     intent.putExtra("isPublic", isPublic);
-                    intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
+                    //intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
                     startActivity(intent);
                 }
                 else {
@@ -99,7 +94,7 @@ public class ConfirmActivity extends ActionBarActivity {
                         Log.e(TAG, "passcode:"+pwd);
                         Intent intent = new Intent(ConfirmActivity.this, FinishActivity.class);
                         intent.putExtra("isPublic", isPublic);
-                        intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
+                        //intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
                         intent.putExtra("passcode", pwd);
                         startActivity(intent);
                     }
