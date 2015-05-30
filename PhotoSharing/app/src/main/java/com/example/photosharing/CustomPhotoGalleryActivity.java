@@ -35,7 +35,7 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
     int numTotalPhotos = 0;
     private Cursor imagecursor;
 
-    final private PhotoSharingApplication app = (PhotoSharingApplication) getApplication();
+    private PhotoSharingApplication app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +44,7 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
         //Intent intent = getIntent();
         //TextView tv = (TextView)findViewById(R.id.tmp);
         //tv.setText(intent.getStringExtra("deviceName"));
-
+        app =  (PhotoSharingApplication) getApplication();
         app.clearSelectedPhotoPaths();
 
         gridView = (GridView) findViewById(R.id.gridView);
