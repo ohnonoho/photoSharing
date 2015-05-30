@@ -11,14 +11,24 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import net.named_data.jndn.Data;
 import net.named_data.jndn.Face;
 import net.named_data.jndn.Interest;
 import net.named_data.jndn.Name;
+import net.named_data.jndn.OnData;
+import net.named_data.jndn.OnTimeout;
+import net.named_data.jndn.encoding.EncodingException;
 import net.named_data.jndn.security.*;
+import net.named_data.jndn.security.SecurityException;
 import net.named_data.jndn.security.identity.IdentityManager;
 import net.named_data.jndn.security.identity.MemoryIdentityStorage;
 import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -44,8 +54,23 @@ public class MenuActivity extends ActionBarActivity {
 
                 //app.addDevice()
 
+                RequestDeviceListTask task = new RequestDeviceListTask();
+                String oAddress = ((PhotoSharingApplication)getApplication()).getOwnerAddress();
+                task.execute(oAddress);
+
                 Intent intent = new Intent(MenuActivity.this, DeviceListActivity.class);
+                ArrayList<DeviceInfo> deviceInfos = ((PhotoSharingApplication)getApplication()).getDeviceList();
+                intent.putParcelableArrayListExtra("devices", deviceInfos);
                 //intent.putExtra("devices", devices);
+
+                // Register the routes
+                ArrayList<String> ips = new ArrayList<String>();
+                for(DeviceInfo info : deviceInfos) {
+                    ips.add(info.ipAddress);
+                }
+                RegisterNFD rTask = new RegisterNFD();
+                rTask.execute(ips);
+
                 startActivity(intent);
             }
         });
@@ -120,6 +145,8 @@ public class MenuActivity extends ActionBarActivity {
 
         private static final String TAG = "Request Device List";
         private Face mFace;
+        private ArrayList<DeviceInfo> deviceInfos = new ArrayList<>();
+        private boolean shouldStop = false;
         @Override
         protected ArrayList<DeviceInfo> doInBackground(String... params) {
 
@@ -135,14 +162,96 @@ public class MenuActivity extends ActionBarActivity {
                 }
 
                 String oAddress = params[0];
+                Log.i(RequestDeviceListTask.TAG, "Owner Address: " + oAddress);
 
                 Interest interest = new Interest(new Name("/" + oAddress + "deviceList"));
-                
+                interest.setInterestLifetimeMilliseconds(10000);
 
-            } catch (net.named_data.jndn.security.SecurityException e) {
+                mFace.expressInterest(interest, new OnData() {
+                    @Override
+                    public void onData(Interest interest, Data data) {
 
+                        String content = data.getContent().toString();
+                        Log.i(RequestDeviceListTask.TAG, "The content has been received." + content);
+                        // Parse the content to a list deviceInfo
+                        try {
+                            JSONArray array = new JSONArray(content);
+                            for (int i = 0; i < array.length(); ++i) {
+                                JSONObject object = array.getJSONObject(i);
+                                DeviceInfo info = new DeviceInfo();
+                                info.deviceName = object.getString("deviceName");
+                                info.ipAddress = object.getString("ipAddress");
+                                deviceInfos.add(info);
+                                shouldStop = true;
+                            }
+                        } catch (JSONException e) {
+                            Log.e(RequestDeviceListTask.TAG, "Failed to construct the JSON");
+                        }
+                    }
+                }, new OnTimeout() {
+                    @Override
+                    public void onTimeout(Interest interest) {
+                        Log.e(RequestDeviceListTask.TAG, "Time Out!");
+                        shouldStop = true;
+                    }
+                });
+
+            while(!shouldStop) {
+                mFace.processEvents();
             }
 
+            } catch (net.named_data.jndn.security.SecurityException e) {
+                Log.e(RequestDeviceListTask.TAG, "Secrity Failed");
+            } catch (IOException e) {
+                Log.e(RequestDeviceListTask.TAG, "IO Failed");
+            } catch (EncodingException e) {
+                Log.e(RequestDeviceListTask.TAG, "Encoding Error");
+            }
+            return deviceInfos;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<DeviceInfo> deviceInfos) {
+            super.onPostExecute(deviceInfos);
+            if(deviceInfos != null) {
+                PhotoSharingApplication application = (PhotoSharingApplication) getApplication();
+                for (DeviceInfo info : deviceInfos) {
+                    application.addDevice(info);
+                }
+            }
+        }
+    }
+
+    // AsyncTask for register the routes on NFD
+    private class RegisterNFD extends AsyncTask<ArrayList<String>, Void, Void> {
+
+        private static final String TAG = "Register NFD Task";
+        private boolean shouldStop = false;
+        private Face mFace;
+        @Override
+        protected Void doInBackground(ArrayList<String>... params) {
+
+            try {
+                KeyChain keyChain = buildTestKeyChain();
+
+                if(params.length < 1) {
+                    Log.e(RegisterNFD.TAG, "No device list");
+                    return null;
+                }
+
+                ArrayList<String> list = params[0];
+                Nfdc ndfc = new Nfdc();
+                for(String ip : list) {
+                    int faceID = ndfc.faceCreate("udp://" + ip);
+                    ndfc.ribRegisterPrefix(new Name("/" + ip), faceID, 10, true, false);
+                }
+                ndfc.shutdown();
+
+            } catch (SecurityException e) {
+                Log.e(RegisterNFD.TAG, "Register Failed");
+            } catch(Exception e) {
+                Log.e(RegisterNFD.TAG, e.toString());
+            }
             return null;
         }
     }

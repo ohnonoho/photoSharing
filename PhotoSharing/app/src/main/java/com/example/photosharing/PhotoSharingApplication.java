@@ -59,6 +59,11 @@ public class PhotoSharingApplication extends Application {
         DeviceInfo d = new DeviceInfo(address, name);
         deviceList.add(d);
     }
+
+    public void addDevice(DeviceInfo info) {
+        deviceList.add(info);
+    }
+
     public void clearSelectedPhotoPaths(){
         selectedPhotoPaths.clear();
         selectedPhotoPaths = new ArrayList<>();

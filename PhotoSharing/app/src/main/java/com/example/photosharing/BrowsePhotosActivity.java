@@ -11,9 +11,11 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,7 +31,26 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import net.named_data.jndn.Data;
+import net.named_data.jndn.Face;
+import net.named_data.jndn.Interest;
+import net.named_data.jndn.Name;
+import net.named_data.jndn.OnData;
+import net.named_data.jndn.OnTimeout;
+import net.named_data.jndn.encoding.EncodingException;
+import net.named_data.jndn.security.*;
+import net.named_data.jndn.security.SecurityException;
+import net.named_data.jndn.security.identity.IdentityManager;
+import net.named_data.jndn.security.identity.MemoryIdentityStorage;
+import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class BrowsePhotosActivity extends ActionBarActivity {
@@ -42,6 +63,8 @@ public class BrowsePhotosActivity extends ActionBarActivity {
     boolean isPublic;
     String passcode;
     String targetPhotoPrefix;
+
+    private ArrayList<ImageItem> imageItemList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -209,6 +232,164 @@ public class BrowsePhotosActivity extends ActionBarActivity {
         }
     }
 
+    // AsyncTask to request the images
+    private class RequestImagesTask extends AsyncTask<String, Void, ArrayList<ImageItem>> {
+
+        private static final String TAG = "Request Image Task";
+        private Face mFace;
+        private boolean shouldStop = false;
+        private ArrayList<ImageItem> images = new ArrayList<ImageItem>();
+        private int seqNumber = Integer.MAX_VALUE;
+        private HashMap<Integer, String> results = new HashMap<>();
+        private byte[] bitmapData = new byte[0];
+        @Override
+        protected ArrayList<ImageItem> doInBackground(String... params) {
+
+            if(params.length < 1) {
+                Log.e(RequestImagesTask.TAG, "No images path");
+                return null;
+            }
+
+            String infoString = params[0];
+            ArrayList<String> filePaths = new ArrayList<>();
+            boolean isPublic = true;
+            String passcode = "";
+            String targetIP = "";
+            try {
+                JSONObject info = new JSONObject(infoString);
+                JSONArray array = info.getJSONArray("filePath");
+                for(int i = 0; i < array.length(); ++i) {
+                    filePaths.add(array.getString(i));
+                }
+                isPublic = info.getBoolean("isPublic");
+                passcode = info.getString("passcode");
+                targetIP = info.getString("targetIP");
+
+            } catch (JSONException e) {
+                Log.e(RequestImagesTask.TAG, "JSON Error");
+            }
+
+            try {
+                final KeyChain keyChain = buildTestKeyChain();
+                mFace = new Face("localhost");
+                mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
+                for(String path : filePaths) {
+
+                    results.clear();
+                    shouldStop = false;
+
+                    String[] strs = path.split("/");
+                    String filename = strs[strs.length - 1];
+
+                    final Name requestName;
+
+                    if(isPublic == true) {
+                        requestName = new Name("/" + targetIP + "/public/" + filename);
+                    }
+                    else {
+                        requestName = new Name("/" + targetIP + "/" + passcode + "/" + filename);
+                    }
+
+                    requestName.appendSequenceNumber(1);
+                    Interest interest =  new Interest(requestName);
+                    interest.setInterestLifetimeMilliseconds(10000);
+                    mFace.expressInterest(interest, new OnData() {
+                        @Override
+                        public void onData(Interest interest, Data data) {
+                            Log.i(RequestImagesTask.TAG, data.getName().toUri());
+                            seqNumber = Integer.parseInt(data.getContent().toString());
+                            Log.i(RequestImagesTask.TAG, "" + seqNumber);
+
+                            Face contentFace = new Face("localhost");
+                            for(int i = 2; i < 2+seqNumber; ++i) {
+                                shouldStop = false;
+                                Log.i(RequestImagesTask.TAG, "Request for data sequence " + i);
+                                try {
+                                    contentFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
+
+                                    Name contentName = new Name(requestName);
+                                    contentName.appendSequenceNumber(i);
+                                    Interest cInterest = new Interest(contentName);
+                                    cInterest.setInterestLifetimeMilliseconds(10000);
+                                    contentFace.expressInterest(cInterest, new OnData() {
+                                        @Override
+                                        public void onData(Interest interest, Data data) {
+                                            try {
+                                                Name dName = data.getName();
+                                                int size = dName.size();
+                                                int seqNo = (int) dName.get(size - 1).toSequenceNumber();
+                                                String content = data.getContent().toString();
+                                                results.put(seqNo, content);
+                                                Log.i(RequestImagesTask.TAG, "Receive data " + seqNo);
+                                                shouldStop = true;
+                                            } catch(EncodingException e) {
+                                                Log.e(RequestImagesTask.TAG, e.toString());
+                                            }
+                                        }
+                                    }, new OnTimeout() {
+                                        @Override
+                                        public void onTimeout(Interest interest) {
+                                            Log.e(RequestImagesTask.TAG, "Time Out During Retriving Data");
+                                            shouldStop = true;
+                                        }
+                                    });
+
+                                    while (!shouldStop) {
+                                        contentFace.processEvents();
+                                    }
+                                } catch (SecurityException e) {
+                                    Log.e(RequestImagesTask.TAG, e.toString());
+                                } catch (IOException e) {
+                                    Log.e(RequestImagesTask.TAG, e.toString());
+                                } catch (EncodingException e) {
+                                    Log.e(RequestImagesTask.TAG, e.toString());
+                                }
+                            }
+                        }
+                    }, new OnTimeout() {
+                        @Override
+                        public void onTimeout(Interest interest) {
+                            Log.e(RequestImagesTask.TAG, "Time out");
+                        }
+                    });
+
+                    while(!shouldStop) {
+                        mFace.processEvents();
+                    }
+
+                    StringBuffer sb = new StringBuffer();
+                    if(results.size() != seqNumber) {
+                        Log.e(RequestImagesTask.TAG, "Failed to obtain some data, ignore it!");
+                        continue;
+                    }
+
+                    for(int i = 2; i < 2+seqNumber; i++) {
+                        sb.append(results.get(i));
+                    }
+                    bitmapData = Base64.decode(sb.toString(), Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
+                    ImageItem imageItem = new ImageItem(bitmap, path);
+                    images.add(imageItem);
+                }
+
+            } catch (net.named_data.jndn.security.SecurityException e) {
+                Log.e(RequestImagesTask.TAG, e.toString());
+            } catch (IOException e) {
+                Log.e(RequestImagesTask.TAG, e.toString());
+            } catch (EncodingException e) {
+                Log.e(RequestImagesTask.TAG, e.toString());
+            }
+
+            return images;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<ImageItem> imageItems) {
+            super.onPostExecute(imageItems);
+            imageItemList = imageItems;
+        }
+    }
+
     public class ImageItem {
         private Bitmap image;
         private String title;
@@ -234,5 +415,19 @@ public class BrowsePhotosActivity extends ActionBarActivity {
         public void setTitle(String title) {
             this.title = title;
         }
+    }
+
+    public static KeyChain buildTestKeyChain() throws net.named_data.jndn.security.SecurityException {
+        MemoryIdentityStorage identityStorage = new MemoryIdentityStorage();
+        MemoryPrivateKeyStorage privateKeyStorage = new MemoryPrivateKeyStorage();
+        IdentityManager identityManager = new IdentityManager(identityStorage, privateKeyStorage);
+        net.named_data.jndn.security.KeyChain keyChain = new net.named_data.jndn.security.KeyChain(identityManager);
+        try {
+            keyChain.getDefaultCertificateName();
+        } catch (net.named_data.jndn.security.SecurityException e) {
+            keyChain.createIdentity(new Name("/test/identity"));
+            keyChain.getIdentityManager().setDefaultIdentity(new Name("/test/identity"));
+        }
+        return keyChain;
     }
 }

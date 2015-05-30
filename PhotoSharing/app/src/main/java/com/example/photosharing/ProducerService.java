@@ -3,6 +3,7 @@ package com.example.photosharing;
 import android.app.IntentService;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Base64;
@@ -29,6 +30,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by peiyang on 15/5/28.
@@ -39,6 +41,7 @@ public class ProducerService extends IntentService {
     private static final String TAG = "Producer Service";
     private Face mFace;
 
+    private HashMap<String, String> fileMap = new HashMap<>();
     private ArrayList<String> filePaths = new ArrayList<>();
     private ArrayList<DeviceInfo> deviceInfos = new ArrayList<>();
     private boolean isPublic = true;
@@ -64,6 +67,10 @@ public class ProducerService extends IntentService {
 
             isPublic = intent.getBooleanExtra("isPublic", true);
             filePaths = intent.getStringArrayListExtra("filePath");
+            for(String str : filePaths) {
+                String[] strs = str.split("/");
+                fileMap.put(strs[strs.length - 1], str);
+            }
             passcode = intent.getStringExtra("passcode");
             mAddress = intent.getStringExtra("mAddress");
             oAddress = intent.getStringExtra("oAddress");
@@ -124,7 +131,7 @@ public class ProducerService extends IntentService {
                                 for(DeviceInfo info : deviceInfos) {
                                     JSONObject object = new JSONObject();
                                     object.put("ipAddress", info.ipAddress);
-                                    object.put("deveiceName", info.deviceName);
+                                    object.put("deviceName", info.deviceName);
                                     array.put(object);
                                 }
 
@@ -134,6 +141,7 @@ public class ProducerService extends IntentService {
 
                                 mFace.putData(data);
                                 Log.i(ProducerService.TAG, "The device info has been send");
+                                Log.i(ProducerService.TAG, "The content is: " + content);
                             }
                         }
                         // When request for /IP/(public or private)/filename/#seq
@@ -145,8 +153,11 @@ public class ProducerService extends IntentService {
                             Data data = new Data(requestName);
 
                             // Read in the image here
-                            Drawable d = getResources().getDrawable(R.drawable.py6);
-                            Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                            // Drawable d = getResources().getDrawable(R.drawable.py6);
+                            // Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                            // ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            // bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                            Bitmap bitmap = BitmapFactory.decodeFile(fileMap.get(component));
                             ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                             byte[] bitmapdata = stream.toByteArray();
