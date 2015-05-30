@@ -12,7 +12,7 @@ import android.widget.Button;
 public class FinishActivity extends ActionBarActivity {
     private Button btnMenu;
 
-    final private PhotoSharingApplication app = (PhotoSharingApplication) getApplication();
+    private PhotoSharingApplication app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +23,7 @@ public class FinishActivity extends ActionBarActivity {
         Intent intent = getIntent();
         boolean isPublic = intent.getBooleanExtra("isPublic", true);
         String passcode = intent.getStringExtra("passcode");
+        app = (PhotoSharingApplication) getApplication();
         String [] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
         for (int i = 0 ; i < selectedPhotoPaths.length ; i++){
             app.addSelectedPhoto(selectedPhotoPaths[i]);

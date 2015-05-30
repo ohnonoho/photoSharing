@@ -55,9 +55,22 @@ public class PhotoSharingApplication extends Application {
     public ArrayList<DeviceInfo> getDeviceList(){
         return deviceList;
     }
+
     public void addDevice(String address, String name){
-        DeviceInfo d = new DeviceInfo(address, name);
-        deviceList.add(d);
+        if (deviceList.isEmpty()){
+            DeviceInfo d = new DeviceInfo(address, name);
+            deviceList.add(d);
+        }
+        else{
+            for( int i = 0 ; i < deviceList.size() ; i ++){
+                if (deviceList.get(i).ipAddress.equals(address)){
+                    deviceList.remove(i);
+                    break;
+                }
+            }
+            DeviceInfo d = new DeviceInfo(address, name);
+            deviceList.add(d);
+        }
     }
     public void clearSelectedPhotoPaths(){
         selectedPhotoPaths.clear();

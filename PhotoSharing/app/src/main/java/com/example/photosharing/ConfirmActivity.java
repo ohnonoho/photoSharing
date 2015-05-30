@@ -29,7 +29,7 @@ public class ConfirmActivity extends ActionBarActivity {
     private TextView passcodeHint;
     private String[] selectedPhotoPaths;
 
-    final private PhotoSharingApplication app = (PhotoSharingApplication) getApplication();
+    private PhotoSharingApplication app;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +46,7 @@ public class ConfirmActivity extends ActionBarActivity {
         //get selected photos
         //Intent intent = getIntent();
         //String[] selectedPhotoPaths;
+        app = (PhotoSharingApplication) getApplication();
         selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getSelectedPhotoPathsLength()]);
         Log.e(TAG, "LENGTH:" + selectedPhotoPaths.length);
 

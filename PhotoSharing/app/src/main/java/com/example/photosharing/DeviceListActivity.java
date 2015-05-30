@@ -18,7 +18,7 @@ import java.util.List;
 
 public class DeviceListActivity extends ActionBarActivity {
     final String TAG = "DeviceListActivity";
-    final private PhotoSharingApplication app = (PhotoSharingApplication) getApplication();
+    private PhotoSharingApplication app;
 
     private ListView listView;
     private List<String> deviceDisplayList;
@@ -28,7 +28,8 @@ public class DeviceListActivity extends ActionBarActivity {
         setContentView(R.layout.activity_device_list);
         Intent intent = getIntent();
         //String[] devices = intent.getStringArrayExtra("devices");
-        final ArrayList<PhotoSharingApplication.DeviceInfo> deviceList = app.getDeviceList();
+        app = (PhotoSharingApplication) this.getApplication();
+        final ArrayList<DeviceInfo> deviceList = app.getDeviceList();
         if ( deviceList.isEmpty() )
             Toast.makeText(getApplicationContext(), "No device discoverable", Toast.LENGTH_LONG).show();
         else {
