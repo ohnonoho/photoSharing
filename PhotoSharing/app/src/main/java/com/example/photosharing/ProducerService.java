@@ -22,6 +22,10 @@ import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
 import net.named_data.jndn.transport.Transport;
 import net.named_data.jndn.util.Blob;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +38,13 @@ public class ProducerService extends IntentService {
     private ArrayList<String> prefixData = new ArrayList<>();
     private static final String TAG = "Producer Service";
     private Face mFace;
+
+    private ArrayList<String> filePaths = new ArrayList<>();
+    private ArrayList<DeviceInfo> deviceInfos = new ArrayList<>();
+    private boolean isPublic = true;
+    private String passcode = "";
+    private String mAddress = "";
+    private String oAddress = "";
 
     public ProducerService() {
         super("ProducerService");
@@ -50,50 +61,120 @@ public class ProducerService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         try {
+
+            isPublic = intent.getBooleanExtra("isPublic", true);
+            filePaths = intent.getStringArrayListExtra("filePath");
+            passcode = intent.getStringExtra("passcode");
+            mAddress = intent.getStringExtra("mAddress");
+            oAddress = intent.getStringExtra("oAddress");
+            // Only avalible when the device is the group owner
+            if(mAddress.equals(oAddress))
+                deviceInfos = intent.getParcelableArrayListExtra("deviceList");
+
+            // Read in all images here, store in a hashmap for later retrieve
+
+
+
+
+
             KeyChain keyChain = buildTestKeyChain();
             mFace = new Face("localhost");
             mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 
-            String myIP = intent.getStringExtra("IP");
-            Log.i(ProducerService.TAG, "My Address is: " + myIP);
-            mFace.registerPrefix(new Name("/" + myIP + "/test"), new OnInterest() {
+            Log.i(ProducerService.TAG, "My Address is: " + mAddress);
+
+            // Register the prefix with the device's address
+            mFace.registerPrefix(new Name("/" + mAddress), new OnInterest() {
                 @Override
                 public void onInterest(Name name, Interest interest, Transport transport, long l) {
                     try {
-                        prefixData.clear();
-                        Name requestName = interest.getName();
-                        String component = requestName.get(2).toEscapedString();
-                        int seqNo = (int) requestName.get(3).toSequenceNumber();
-                        Data data = new Data(requestName);
+                        int size = interest.getName().size();
+                        Log.i(ProducerService.TAG, "Size: " + size);
+                        Log.i(ProducerService.TAG, "Interest Name: " + interest.getName().toUri());
+                        // When request for /IP/info
+                        // When the device is also the owner, also serve the deviceList
+                        if(size == 2) {
+                            Name requestName = interest.getName();
+                            String component = requestName.get(1).toEscapedString();
+                            if(component.equals("info")) {
 
-                        // Read in the image here
-                        Drawable d = getResources().getDrawable(R.drawable.py6);
-                        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                        byte[] bitmapdata = stream.toByteArray();
-                        String content = Base64.encodeToString(bitmapdata, Base64.DEFAULT);
+                                // Construct the JSON object
+                                JSONObject json = new JSONObject();
+                                json.put("isPublic", isPublic);
+                                json.put("passcode", passcode);
+                                // ArrayList<String> list = new ArrayList<String>();
+                                // list.add("filename1");
+                                // list.add("filename2");
+                                JSONArray array = new JSONArray(filePaths);
+                                json.put("filePath", array);
+                                Log.i(ProducerService.TAG, "The info data " + json.toString());
 
-                        // Split the data
-                        int fixLength = 8000;
-                        int cnt = (content.length() / fixLength) + 1;
+                                // Construct the data packet
+                                Data data = new Data(requestName);
+                                data.setContent(new Blob(json.toString()));
 
-                        for (int i = 0; i < cnt; i++) {
-                            prefixData.add(content.substring(i * fixLength, Math.min((i + 1) * fixLength, content.length())));
+                                mFace.putData(data);
+                                Log.i(ProducerService.TAG, "The info data has been send");
+                            }
+                            // The owner serve this
+                            else if(component.equals("deviceList")) {
+
+                                // The device should be the owner
+                                JSONArray array = new JSONArray();
+                                for(DeviceInfo info : deviceInfos) {
+                                    JSONObject object = new JSONObject();
+                                    object.put("ipAddress", info.ipAddress);
+                                    object.put("deveiceName", info.deviceName);
+                                    array.put(object);
+                                }
+
+                                String content = array.toString();
+                                Data data = new Data(requestName);
+                                data.setContent(new Blob(content));
+
+                                mFace.putData(data);
+                                Log.i(ProducerService.TAG, "The device info has been send");
+                            }
                         }
+                        // When request for /IP/(public or private)/filename/#seq
+                        else if(size == 4) {
+                            prefixData.clear();
+                            Name requestName = interest.getName();
+                            String component = requestName.get(2).toEscapedString();
+                            int seqNo = (int) requestName.get(3).toSequenceNumber();
+                            Data data = new Data(requestName);
 
-                        if (seqNo == 1) {
-                            data.setContent(new Blob("" + prefixData.size()));
-                        } else {
-                            data.setContent(new Blob(prefixData.get(seqNo - 2)));
+                            // Read in the image here
+                            Drawable d = getResources().getDrawable(R.drawable.py6);
+                            Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                            byte[] bitmapdata = stream.toByteArray();
+                            String content = Base64.encodeToString(bitmapdata, Base64.DEFAULT);
+
+                            // Split the data
+                            int fixLength = 8000;
+                            int cnt = (content.length() / fixLength) + 1;
+
+                            for (int i = 0; i < cnt; i++) {
+                                prefixData.add(content.substring(i * fixLength, Math.min((i + 1) * fixLength, content.length())));
+                            }
+
+                            if (seqNo == 1) {
+                                data.setContent(new Blob("" + prefixData.size()));
+                            } else {
+                                data.setContent(new Blob(prefixData.get(seqNo - 2)));
+                            }
+                            mFace.putData(data);
+                            Log.i(ProducerService.TAG, "Send out the data " + interest.getName().toUri());
                         }
-                        mFace.putData(data);
-                        Log.i(ProducerService.TAG, "Send out the data " + interest.getName().toUri());
 
                     } catch (EncodingException e) {
                         Log.e(ProducerService.TAG, "Failed to encode");
                     } catch (IOException e) {
                         Log.e(ProducerService.TAG, "Failed to send the data");
+                    } catch (JSONException e) {
+                        Log.e(ProducerService.TAG, "Failed to construct the json object");
                     }
                 }
             }, new OnRegisterFailed() {

@@ -15,6 +15,7 @@ import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.security.*;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -47,12 +48,17 @@ import net.named_data.jndn.OnRegisterFailed;
 import net.named_data.jndn.OnTimeout;
 import net.named_data.jndn.encoding.EncodingException;
 import net.named_data.jndn.security.*;
+import net.named_data.jndn.security.KeyChain;
 import net.named_data.jndn.security.SecurityException;
 import net.named_data.jndn.security.identity.IdentityManager;
 import net.named_data.jndn.security.identity.MemoryIdentityStorage;
 import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
 import net.named_data.jndn.transport.Transport;
 import net.named_data.jndn.util.Blob;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -116,6 +122,15 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 RequestTask requestTask = new RequestTask();
                 String prefix = btnRequire2.getText().toString();
                 requestTask.execute(prefix);
+            }
+        });
+
+        Button btnInfo = (Button) mView.findViewById(R.id.info_button);
+        btnInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RequestInfoTask task = new RequestInfoTask();
+                task.execute();
             }
         });
 
@@ -559,7 +574,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                         try {
                             Nfdc nfdc = new Nfdc();
                             mFaceID = nfdc.faceCreate("udp://" + oAddress);
-                            nfdc.ribRegisterPrefix(new Name("/" + oAddress + "/test"), mFaceID, 10, true, false);
+                            nfdc.ribRegisterPrefix(new Name("/" + oAddress), mFaceID, 10, true, false);
                             nfdc.shutdown();
                         } catch(Exception e) {
                             e.printStackTrace();
@@ -581,6 +596,64 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
             });
             thread.run();
             Log.i(ProducerActivity.TAG, "register");
+
+            return null;
+        }
+    }
+
+    private class RequestInfoTask extends AsyncTask<Void, Void, Void> {
+
+        private static final String TAG = "Request Info Task";
+        private Face mFace;
+        private boolean shouldStop = false;
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            try {
+                // Send the interest to /IP/info
+                KeyChain keyChain = buildTestKeyChain();
+                mFace = new Face("localhost");
+                mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
+
+                String oAddress = ((ProducerActivity)getActivity()).getOwnerIPAddress();
+
+                Interest interest = new Interest(new Name("/" + oAddress + "/info"));
+                interest.setInterestLifetimeMilliseconds(10000);
+                mFace.expressInterest(interest, new OnData() {
+                    @Override
+                    public void onData(Interest interest, Data data) {
+                        String content = data.getContent().toString();
+                        try {
+                            JSONObject json = new JSONObject(content);
+                            JSONArray array = json.getJSONArray("file");
+                            Log.i(RequestInfoTask.TAG, "JSON mode:" + json.getString("mode"));
+                            for(int i = 0; i < array.length(); ++i) {
+                                Log.i(RequestInfoTask.TAG, "JSON file: " + array.getString(i));
+                            }
+                        } catch (JSONException e) {
+                            Log.e(RequestInfoTask.TAG, "Failed to construct the JSON");
+                        }
+                        shouldStop = true;
+                    }
+                }, new OnTimeout() {
+                    @Override
+                    public void onTimeout(Interest interest) {
+                        Log.e(RequestInfoTask.TAG, "Time Out!");
+                    }
+                });
+
+                while(!shouldStop) {
+                    mFace.processEvents();
+                }
+
+            } catch(SecurityException e) {
+                Log.e(RequestInfoTask.TAG, "Security Failed");
+            } catch(IOException e) {
+                Log.e(RequestInfoTask.TAG, e.toString());
+            } catch(EncodingException e) {
+                Log.e(RequestInfoTask.TAG, e.toString());
+            }
 
             return null;
         }

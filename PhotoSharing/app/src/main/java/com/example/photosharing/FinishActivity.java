@@ -28,8 +28,19 @@ public class FinishActivity extends ActionBarActivity {
             app.addSelectedPhoto(selectedPhotoPaths[i]);
         }
         //do something on NFD !!!!!
-        //update /ip/info
+        //update /ip/info{
         //register photos
+
+        Intent prodIntent = new Intent(this, ProducerService.class);
+
+        prodIntent.putExtra("isPublic", isPublic);
+        prodIntent.putStringArrayListExtra("filePath", app.getSelectedPhotoPaths());
+        prodIntent.putExtra("passcode", passcode);
+        prodIntent.putExtra("mAddress", app.getMyAddress());
+        prodIntent.putExtra("oAddress", app.getOwnerAddress());
+        prodIntent.putParcelableArrayListExtra("deviceList", app.getDeviceList());
+
+        this.startService(intent);
 
         btnMenu = (Button) this.findViewById(R.id.btnMenu);
         btnMenu.setOnClickListener(new View.OnClickListener() {

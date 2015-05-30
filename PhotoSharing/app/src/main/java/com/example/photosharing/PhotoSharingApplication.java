@@ -82,18 +82,4 @@ public class PhotoSharingApplication extends Application {
     public int getSelectedPhotoPathsLength(){
         return selectedPhotoPaths.size();
     }
-
-
-    public class DeviceInfo{
-        public String ipAddress;
-        public String deviceName;
-
-        public DeviceInfo(){
-
-        }
-        public DeviceInfo(String a, String b){
-            ipAddress = a;
-            deviceName = b;
-        }
-    }
 }

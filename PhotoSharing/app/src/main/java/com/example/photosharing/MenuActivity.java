@@ -1,13 +1,25 @@
 package com.example.photosharing;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import net.named_data.jndn.Face;
+import net.named_data.jndn.Interest;
+import net.named_data.jndn.Name;
+import net.named_data.jndn.security.*;
+import net.named_data.jndn.security.identity.IdentityManager;
+import net.named_data.jndn.security.identity.MemoryIdentityStorage;
+import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
+
+import java.util.ArrayList;
 
 
 public class MenuActivity extends ActionBarActivity {
@@ -100,5 +112,52 @@ public class MenuActivity extends ActionBarActivity {
             btnSharePhotos.setEnabled(false);
             btnSharePhotos.setBackground(getResources().getDrawable(R.drawable.btnsharemyphotosdisable));
         }
+    }
+
+    // AsyncTask for requesting device list, input is the owner's address
+    // /oAddress/deveicList
+    private class RequestDeviceListTask extends AsyncTask<String, Void, ArrayList<DeviceInfo>> {
+
+        private static final String TAG = "Request Device List";
+        private Face mFace;
+        @Override
+        protected ArrayList<DeviceInfo> doInBackground(String... params) {
+
+            try {
+                KeyChain keyChain = buildTestKeyChain();
+                mFace = new Face("localhost");
+                mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
+
+                // Invalid input
+                if(params.length < 1) {
+                    Log.e(RequestDeviceListTask.TAG, "No owner address!");
+                    return null;
+                }
+
+                String oAddress = params[0];
+
+                Interest interest = new Interest(new Name("/" + oAddress + "deviceList"));
+                
+
+            } catch (net.named_data.jndn.security.SecurityException e) {
+
+            }
+
+            return null;
+        }
+    }
+
+    public static KeyChain buildTestKeyChain() throws net.named_data.jndn.security.SecurityException {
+        MemoryIdentityStorage identityStorage = new MemoryIdentityStorage();
+        MemoryPrivateKeyStorage privateKeyStorage = new MemoryPrivateKeyStorage();
+        IdentityManager identityManager = new IdentityManager(identityStorage, privateKeyStorage);
+        net.named_data.jndn.security.KeyChain keyChain = new net.named_data.jndn.security.KeyChain(identityManager);
+        try {
+            keyChain.getDefaultCertificateName();
+        } catch (net.named_data.jndn.security.SecurityException e) {
+            keyChain.createIdentity(new Name("/test/identity"));
+            keyChain.getIdentityManager().setDefaultIdentity(new Name("/test/identity"));
+        }
+        return keyChain;
     }
 }
