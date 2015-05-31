@@ -66,6 +66,7 @@ public class DeviceListActivity extends ActionBarActivity {
             int i = 0;
             for (i = 0; i < deviceList.size(); i++) {
                 deviceDisplayList.add(deviceList.get(i).ipAddress);
+                Log.i(TAG, "decive list index: " + i);
             }
             listView = new ListView(this);
             listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, deviceDisplayList));

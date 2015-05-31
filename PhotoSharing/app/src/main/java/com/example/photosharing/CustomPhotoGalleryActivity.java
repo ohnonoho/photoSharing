@@ -80,7 +80,7 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
             imagecursor.moveToPosition(i);
             arrPath[i] = imagecursor.getString(imagecursor.getColumnIndex(MediaStore.Images.Media.DATA));
             BitmapFactory.Options option = new BitmapFactory.Options();
-            option.inSampleSize = 4;
+            option.inSampleSize = 8;
             Bitmap image = BitmapFactory.decodeFile(arrPath[i], option);
             imageItems.add(new ImageItem(image, "Image#" + i));
         }
