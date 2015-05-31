@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import net.named_data.jndn.Data;
@@ -68,6 +69,10 @@ public class DeviceListActivity extends ActionBarActivity {
                 deviceDisplayList.add(deviceList.get(i).ipAddress);
                 Log.i(TAG, "decive list index: " + i);
             }
+//            SimpleAdapter adapter = new SimpleAdapter(this, getData() ,R.layout.vlist,
+//                                        new String[]{"title","info","img"},
+//                                        new int[]{R.id.title,R.id.info,R.id.img});
+
             listView = new ListView(this);
             listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, deviceDisplayList));
             setContentView(listView);

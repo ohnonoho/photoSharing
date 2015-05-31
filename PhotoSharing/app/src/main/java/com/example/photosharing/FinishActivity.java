@@ -24,9 +24,9 @@ public class FinishActivity extends ActionBarActivity {
         boolean isPublic = intent.getBooleanExtra("isPublic", true);
         String passcode = intent.getStringExtra("passcode");
         app = (PhotoSharingApplication) getApplication();
-        // String [] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        String [] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
         // String[] selectedPhotoPaths = (String[])app.getSelectedPhotoPaths().toArray();
-        String[] selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getDeviceListLength()]);
+        //String[] selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getDeviceListLength()]);
         for (int i = 0 ; i < selectedPhotoPaths.length ; i++){
             app.addSelectedPhoto(selectedPhotoPaths[i]);
         }
