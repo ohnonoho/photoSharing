@@ -12,10 +12,38 @@ import android.widget.Button;
 public class FinishActivity extends ActionBarActivity {
     private Button btnMenu;
 
+    private PhotoSharingApplication app;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_finish);
+
+
+        Intent intent = getIntent();
+        boolean isPublic = intent.getBooleanExtra("isPublic", true);
+        String passcode = intent.getStringExtra("passcode");
+        app = (PhotoSharingApplication) getApplication();
+        // String [] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        // String[] selectedPhotoPaths = (String[])app.getSelectedPhotoPaths().toArray();
+        String[] selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getDeviceListLength()]);
+        for (int i = 0 ; i < selectedPhotoPaths.length ; i++){
+            app.addSelectedPhoto(selectedPhotoPaths[i]);
+        }
+        //do something on NFD !!!!!
+        //update /ip/info{
+        //register photos
+
+        Intent prodIntent = new Intent(this, ProducerService.class);
+
+        prodIntent.putExtra("isPublic", isPublic);
+        prodIntent.putStringArrayListExtra("filePath", app.getSelectedPhotoPaths());
+        prodIntent.putExtra("passcode", passcode);
+        prodIntent.putExtra("mAddress", app.getMyAddress());
+        prodIntent.putExtra("oAddress", app.getOwnerAddress());
+        prodIntent.putParcelableArrayListExtra("deviceList", app.getDeviceList());
+
+        this.startService(prodIntent);
 
         btnMenu = (Button) this.findViewById(R.id.btnMenu);
         btnMenu.setOnClickListener(new View.OnClickListener() {
