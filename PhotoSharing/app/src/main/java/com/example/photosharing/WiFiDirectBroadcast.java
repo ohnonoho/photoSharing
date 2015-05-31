@@ -105,6 +105,10 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                 if(networkInfo.isConnected()) {
                     RequestOwner task = new RequestOwner();
                     task.execute();
+                    MenuActivity.wifiDirectConnected = true;
+                }
+                else {
+                    MenuActivity.wifiDirectConnected = false;
                 }
             }
 

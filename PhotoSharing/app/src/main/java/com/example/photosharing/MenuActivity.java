@@ -61,6 +61,13 @@ public class MenuActivity extends ActionBarActivity {
                     Log.i("Request Deivce List", "Start to request device list from " + oAddress);
                     task.execute(oAddress);
                 }
+                else {
+                    RegisterNFD task = new RegisterNFD((PhotoSharingApplication)getApplication());
+                    Log.i("Menu Activity", "Register on NFD");
+                    ArrayList<DeviceInfo> deviceInfos = ((PhotoSharingApplication)getApplication()).getDeviceList();
+                    Log.i("Menu Activity", "The device list " + deviceInfos.toString());
+                    task.execute(deviceInfos);
+                }
 
                 Intent intent = new Intent(MenuActivity.this, DeviceListActivity.class);
                 ArrayList<DeviceInfo> deviceInfos = ((PhotoSharingApplication)getApplication()).getDeviceList();
@@ -127,7 +134,7 @@ public class MenuActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        wifiDirectConnected = true;
+        // wifiDirectConnected = true;
         if (wifiDirectConnected){
             btnGetPhotos.setEnabled(true);
             btnGetPhotos.setBackground(getResources().getDrawable(R.drawable.btnviewothersenable));
@@ -232,7 +239,7 @@ public class MenuActivity extends ActionBarActivity {
             if(deviceInfos != null) {
                 // PhotoSharingApplication application = (PhotoSharingApplication) getApplication();
                 for (DeviceInfo info : deviceInfos) {
-                    app.addDevice(info);
+                    app.addDevice(info.ipAddress, info.deviceName);
                 }
 
                 RegisterNFD task = new RegisterNFD(app);
@@ -256,7 +263,7 @@ public class MenuActivity extends ActionBarActivity {
         protected Void doInBackground(ArrayList<DeviceInfo>... params) {
 
             try {
-                KeyChain keyChain = buildTestKeyChain();
+                // KeyChain keyChain = buildTestKeyChain();
 
                 if(params.length < 1) {
                     Log.e(RegisterNFD.TAG, "No device list");
@@ -266,6 +273,8 @@ public class MenuActivity extends ActionBarActivity {
                 ArrayList<DeviceInfo> list = params[0];
                 Nfdc ndfc = new Nfdc();
                 for(DeviceInfo info : list) {
+                    if(info.ipAddress.equals(app.getMyAddress()))
+                        continue;
                     int faceID = ndfc.faceCreate("udp:/" + info.ipAddress);
                     ndfc.ribRegisterPrefix(new Name(info.ipAddress), faceID, 10, true, false);
                 }
