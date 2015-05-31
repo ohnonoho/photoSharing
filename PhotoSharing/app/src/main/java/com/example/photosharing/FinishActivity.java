@@ -24,7 +24,9 @@ public class FinishActivity extends ActionBarActivity {
         boolean isPublic = intent.getBooleanExtra("isPublic", true);
         String passcode = intent.getStringExtra("passcode");
         app = (PhotoSharingApplication) getApplication();
-        String [] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        // String [] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        // String[] selectedPhotoPaths = (String[])app.getSelectedPhotoPaths().toArray();
+        String[] selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getDeviceListLength()]);
         for (int i = 0 ; i < selectedPhotoPaths.length ; i++){
             app.addSelectedPhoto(selectedPhotoPaths[i]);
         }
@@ -41,7 +43,7 @@ public class FinishActivity extends ActionBarActivity {
         prodIntent.putExtra("oAddress", app.getOwnerAddress());
         prodIntent.putParcelableArrayListExtra("deviceList", app.getDeviceList());
 
-        this.startService(intent);
+        this.startService(prodIntent);
 
         btnMenu = (Button) this.findViewById(R.id.btnMenu);
         btnMenu.setOnClickListener(new View.OnClickListener() {

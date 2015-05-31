@@ -232,7 +232,9 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                             Log.i(ProducerActivity.TAG, "OWNER LOGIC DONE");
 
                         }
+                        app.setOwnerAddress(oAddress);
                         Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
+                        app.setMyAddress(localIP);
                         Log.i(ProducerActivity.TAG, "My Address:" + localIP);
                         Log.i(ProducerActivity.TAG, "Register status: " + returnData);
                         fragment.updateGroupOwner(isOwner, oAddress);

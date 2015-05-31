@@ -125,13 +125,15 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
                 startActivity(intent);
                 return true;
             case R.id.share:
+                Log.i("Share", "" + numTotalPhotos);
                 ArrayList<String> selectedPhotoPaths = new ArrayList<String>();
                 int count = 0;
                 for (int i = 0; i < numTotalPhotos; i++) {
+                    Log.i("Check", "" + i + " : " + isChecked[i]);
                     if (isChecked[i]) {
                         count++;
-                        selectedPhotoPaths.add(arrPath[i]);// = selectImages + arrPath[i] + "|";
-                        //app.addSelectedPhoto(arrPath[i]);
+                        // selectedPhotoPaths.add(arrPath[i]);// = selectImages + arrPath[i] + "|";
+                        app.addSelectedPhoto(arrPath[i]);
                         Log.e(TAG, arrPath[i]);
                     }
                 }
@@ -193,6 +195,7 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
             holder.image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.i("Image", "click!");
                     if (isChecked[position]) {
                         holder.chkbox.setChecked(false);
                         isChecked[position] = false;

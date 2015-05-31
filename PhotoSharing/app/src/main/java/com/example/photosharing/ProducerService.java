@@ -65,18 +65,25 @@ public class ProducerService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         try {
 
+            Log.i("Produce Serivce", "Start Produce Service");
+
             isPublic = intent.getBooleanExtra("isPublic", true);
+            Log.i("Produce Serive", "" + isPublic);
             filePaths = intent.getStringArrayListExtra("filePath");
             for(String str : filePaths) {
+                Log.i("Produce Service", str);
                 String[] strs = str.split("/");
                 fileMap.put(strs[strs.length - 1], str);
             }
+            Log.i("Produce Service", fileMap.toString());
             passcode = intent.getStringExtra("passcode");
             mAddress = intent.getStringExtra("mAddress");
             oAddress = intent.getStringExtra("oAddress");
             // Only avalible when the device is the group owner
             if(mAddress.equals(oAddress))
                 deviceInfos = intent.getParcelableArrayListExtra("deviceList");
+
+            Log.i("Produce Service", deviceInfos.toString());
 
             // Read in all images here, store in a hashmap for later retrieve
 
@@ -135,6 +142,11 @@ public class ProducerService extends IntentService {
                                     array.put(object);
                                 }
 
+                                JSONObject object = new JSONObject();
+                                object.put("ipAddress", "/"+mAddress);
+                                object.put("deviceName", "owner");
+                                array.put(object);
+
                                 String content = array.toString();
                                 Data data = new Data(requestName);
                                 data.setContent(new Blob(content));
@@ -157,7 +169,10 @@ public class ProducerService extends IntentService {
                             // Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
                             // ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             // bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                            Bitmap bitmap = BitmapFactory.decodeFile(fileMap.get(component));
+                            BitmapFactory.Options option = new BitmapFactory.Options();
+                            option.inSampleSize = 8;
+                            Bitmap bitmap = BitmapFactory.decodeFile(fileMap.get(component), option);
+                            // Bitmap bitmap = BitmapFactory.decodeFile(fileMap.get(component));
                             ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                             byte[] bitmapdata = stream.toByteArray();

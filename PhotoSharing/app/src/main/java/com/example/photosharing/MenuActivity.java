@@ -53,10 +53,14 @@ public class MenuActivity extends ActionBarActivity {
                 //get and update device list
 
                 //app.addDevice()
-
-                RequestDeviceListTask task = new RequestDeviceListTask();
                 String oAddress = ((PhotoSharingApplication)getApplication()).getOwnerAddress();
-                task.execute(oAddress);
+                String mAddress = ((PhotoSharingApplication)getApplication()).getMyAddress();
+                if(!oAddress.equals(mAddress)) {
+                    RequestDeviceListTask task = new RequestDeviceListTask((PhotoSharingApplication)getApplication());
+                    // String oAddress = ((PhotoSharingApplication) getApplication()).getOwnerAddress();
+                    Log.i("Request Deivce List", "Start to request device list from " + oAddress);
+                    task.execute(oAddress);
+                }
 
                 Intent intent = new Intent(MenuActivity.this, DeviceListActivity.class);
                 ArrayList<DeviceInfo> deviceInfos = ((PhotoSharingApplication)getApplication()).getDeviceList();
@@ -64,12 +68,12 @@ public class MenuActivity extends ActionBarActivity {
                 //intent.putExtra("devices", devices);
 
                 // Register the routes
-                ArrayList<String> ips = new ArrayList<String>();
-                for(DeviceInfo info : deviceInfos) {
-                    ips.add(info.ipAddress);
-                }
-                RegisterNFD rTask = new RegisterNFD();
-                rTask.execute(ips);
+                // ArrayList<String> ips = new ArrayList<String>();
+                // for(DeviceInfo info : deviceInfos) {
+                    // ips.add(info.ipAddress);
+                // }
+                // RegisterNFD rTask = new RegisterNFD();
+                // rTask.execute(ips);
 
                 startActivity(intent);
             }
@@ -147,6 +151,10 @@ public class MenuActivity extends ActionBarActivity {
         private Face mFace;
         private ArrayList<DeviceInfo> deviceInfos = new ArrayList<>();
         private boolean shouldStop = false;
+        private PhotoSharingApplication app;
+        public RequestDeviceListTask(PhotoSharingApplication application) {
+            this.app = application;
+        }
         @Override
         protected ArrayList<DeviceInfo> doInBackground(String... params) {
 
@@ -164,7 +172,13 @@ public class MenuActivity extends ActionBarActivity {
                 String oAddress = params[0];
                 Log.i(RequestDeviceListTask.TAG, "Owner Address: " + oAddress);
 
-                Interest interest = new Interest(new Name("/" + oAddress + "deviceList"));
+                Nfdc nfdc = new Nfdc();
+                int faceId = nfdc.faceCreate("udp://" + oAddress);
+                nfdc.ribRegisterPrefix(new Name("/" + oAddress), faceId, 10, true, false);
+                nfdc.shutdown();
+
+
+                Interest interest = new Interest(new Name("/" + oAddress + "/deviceList"));
                 interest.setInterestLifetimeMilliseconds(10000);
 
                 mFace.expressInterest(interest, new OnData() {
@@ -206,6 +220,8 @@ public class MenuActivity extends ActionBarActivity {
                 Log.e(RequestDeviceListTask.TAG, "IO Failed");
             } catch (EncodingException e) {
                 Log.e(RequestDeviceListTask.TAG, "Encoding Error");
+            } catch (Exception e) {
+                Log.e(RequestDeviceListTask.TAG, e.toString());
             }
             return deviceInfos;
         }
@@ -214,22 +230,30 @@ public class MenuActivity extends ActionBarActivity {
         protected void onPostExecute(ArrayList<DeviceInfo> deviceInfos) {
             super.onPostExecute(deviceInfos);
             if(deviceInfos != null) {
-                PhotoSharingApplication application = (PhotoSharingApplication) getApplication();
+                // PhotoSharingApplication application = (PhotoSharingApplication) getApplication();
                 for (DeviceInfo info : deviceInfos) {
-                    application.addDevice(info);
+                    app.addDevice(info);
                 }
+
+                RegisterNFD task = new RegisterNFD(app);
+                task.execute(deviceInfos);
             }
         }
     }
 
     // AsyncTask for register the routes on NFD
-    private class RegisterNFD extends AsyncTask<ArrayList<String>, Void, Void> {
+    private class RegisterNFD extends AsyncTask<ArrayList<DeviceInfo>, Void, Void> {
 
         private static final String TAG = "Register NFD Task";
         private boolean shouldStop = false;
         private Face mFace;
+        private PhotoSharingApplication app;
+
+        public RegisterNFD(PhotoSharingApplication app) {
+            this.app = app;
+        }
         @Override
-        protected Void doInBackground(ArrayList<String>... params) {
+        protected Void doInBackground(ArrayList<DeviceInfo>... params) {
 
             try {
                 KeyChain keyChain = buildTestKeyChain();
@@ -239,11 +263,11 @@ public class MenuActivity extends ActionBarActivity {
                     return null;
                 }
 
-                ArrayList<String> list = params[0];
+                ArrayList<DeviceInfo> list = params[0];
                 Nfdc ndfc = new Nfdc();
-                for(String ip : list) {
-                    int faceID = ndfc.faceCreate("udp://" + ip);
-                    ndfc.ribRegisterPrefix(new Name("/" + ip), faceID, 10, true, false);
+                for(DeviceInfo info : list) {
+                    int faceID = ndfc.faceCreate("udp:/" + info.ipAddress);
+                    ndfc.ribRegisterPrefix(new Name(info.ipAddress), faceID, 10, true, false);
                 }
                 ndfc.shutdown();
 

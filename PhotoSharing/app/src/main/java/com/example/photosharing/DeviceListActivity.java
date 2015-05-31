@@ -1,5 +1,6 @@
 package com.example.photosharing;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
@@ -44,11 +45,13 @@ public class DeviceListActivity extends ActionBarActivity {
 
     private boolean isPublic;
     private String passcode;
+
+    private Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_list);
-        Intent intent = getIntent();
+        // Intent intent = getIntent();
         //String[] devices = intent.getStringArrayExtra("devices");
 
         app = (PhotoSharingApplication) this.getApplication();
@@ -71,24 +74,25 @@ public class DeviceListActivity extends ActionBarActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     String targetIP = deviceDisplayList.get(position);
-                    Intent intent = new Intent(DeviceListActivity.this, BrowsePhotosActivity.class);
+                    Log.i("Target IP", "" + targetIP);
+                    intent = new Intent(DeviceListActivity.this, BrowsePhotosActivity.class);
                     intent.putExtra("deviceName", deviceList.get(position).deviceName);
                     intent.putExtra("targetIP", targetIP);
                     //get info from the device
                     //do something on NFD !!!!!
                     //get /target/info, isPublic, passcode
 
-                    RequestInfo task = new RequestInfo();
+                    RequestInfo task = new RequestInfo(getApplicationContext());
                     task.execute(targetIP);
 
-                    intent.putExtra("isPublic", isPublic);
+                    // intent.putExtra("isPublic", isPublic);
                     // String passcode = "";
                     // if (passcode.equals(""))
                     //    passcode = "123";
-                    intent.putExtra("passcode", passcode);
-                    intent.putExtra("info", info.toString());
+                    // intent.putExtra("passcode", passcode);
+                    // intent.putExtra("info", info.toString());
 
-                    startActivity(intent);
+                    // startActivity(intent);
                 }
             });
         }
@@ -131,8 +135,14 @@ public class DeviceListActivity extends ActionBarActivity {
 
         private static final String TAG = "Request Info";
         private Face mFace;
-        private JSONObject info;
+        private JSONObject mInfo;
         private boolean shouldStop = false;
+
+        Context context;
+
+        public RequestInfo(Context context) {
+            this.context = context;
+        }
         @Override
         protected JSONObject doInBackground(String... params) {
 
@@ -148,17 +158,18 @@ public class DeviceListActivity extends ActionBarActivity {
                 }
 
                 String oAddress = params[0];
-
-                Interest interest = new Interest(new Name("/" + oAddress + "/info"));
+                Log.i(RequestInfo.TAG, "Target Address " + oAddress);
+                Interest interest = new Interest(new Name(oAddress + "/info"));
                 interest.setInterestLifetimeMilliseconds(10000);
                 mFace.expressInterest(interest, new OnData() {
                     @Override
                     public void onData(Interest interest, Data data) {
 
                         String content = data.getContent().toString();
+                        Log.i(RequestInfo.TAG, "The info content " + content);
                         // Parse the content to JSONObject
                         try {
-                            info = new JSONObject(content);
+                            mInfo = new JSONObject(content);
                         } catch (JSONException e) {
                             Log.i(RequestInfo.TAG, "Failed to construct json object");
                         }
@@ -183,15 +194,19 @@ public class DeviceListActivity extends ActionBarActivity {
                 Log.e(RequestInfo.TAG, e.toString());
             }
 
-            return info;
+            return mInfo;
         }
 
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
             super.onPostExecute(jsonObject);
-            if(info != null) {
+            if(jsonObject != null) {
                 info = jsonObject;
+                intent.putExtra("info", jsonObject.toString());
             }
+            Log.i(RequestInfo.TAG, intent.toString());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
         }
     }
 

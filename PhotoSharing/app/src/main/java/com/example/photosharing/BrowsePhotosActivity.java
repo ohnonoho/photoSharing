@@ -59,10 +59,13 @@ public class BrowsePhotosActivity extends ActionBarActivity {
     private Dialog dialog;
     String TAG = "BrowsePhotosActivity";
 
-    String deviceName;
-    boolean isPublic;
-    String passcode;
-    String targetPhotoPrefix;
+    String deviceName = "";
+    boolean isPublic = true;
+    String passcode = "";
+    String targetPhotoPrefix = "";
+    String targetIP = "";
+
+    JSONObject info;
 
     private ArrayList<ImageItem> imageItemList = new ArrayList<>();
 
@@ -72,9 +75,26 @@ public class BrowsePhotosActivity extends ActionBarActivity {
         setContentView(R.layout.activity_browse_photos);
         Intent intent = getIntent();
         //TextView tv = (TextView)findViewById(R.id.tmp);
-        deviceName = intent.getStringExtra("deviceName");
-        isPublic = intent.getBooleanExtra("isPublic", true);
-        passcode = intent.getStringExtra("passcode");
+        String jsonString = intent.getStringExtra("info");
+        gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, imageItemList);
+
+        try {
+            if(jsonString != null) {
+                info = new JSONObject(jsonString);
+                deviceName = intent.getStringExtra("deviceName");
+                isPublic = intent.getBooleanExtra("isPublic", true);
+                passcode = intent.getStringExtra("passcode");
+                targetIP = intent.getStringExtra("targetIP");
+                info.put("deviceName", deviceName);
+                info.put("isPublic", isPublic);
+                info.put("passcode", passcode);
+                info.put("targetIP", targetIP);
+                Log.i("JSON", info.toString());
+            }
+        } catch (JSONException e) {
+            Log.i("On Create", e.toString());
+        }
+        Log.i("Shwo Images", targetIP);
 
         // the cotent that someone is sharing is public
         if (isPublic ) {
@@ -118,6 +138,8 @@ public class BrowsePhotosActivity extends ActionBarActivity {
             dialog.show();
         }
 
+        RequestImagesTask task = new RequestImagesTask(imageItemList, gridAdapter);
+        task.execute(info);
 
 
 
@@ -128,20 +150,22 @@ public class BrowsePhotosActivity extends ActionBarActivity {
         // use the device name to retrive photos from the other device
         //do something on NFD !!!!!
         //use targetPhotoPrefix to get photos
-        Log.e(TAG, "targetPhotoPrefix:" + targetPhotoPrefix);
-        final ArrayList<ImageItem> imageItems = new ArrayList<>();
-        TypedArray imgs = getResources().obtainTypedArray(R.array.image_ids);
-        for (int i = 0; i < imgs.length(); i++) {
-            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), imgs.getResourceId(i, -1));
-            imageItems.add(new ImageItem(bitmap, "Image#" + i));
-        }
-        return imageItems;
+//        Log.e(TAG, "targetPhotoPrefix:" + targetPhotoPrefix);
+//        final ArrayList<ImageItem> imageItems = new ArrayList<>();
+//        TypedArray imgs = getResources().obtainTypedArray(R.array.image_ids);
+//        for (int i = 0; i < imgs.length(); i++) {
+//            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), imgs.getResourceId(i, -1));
+//            imageItems.add(new ImageItem(bitmap, "Image#" + i));
+//        }
+        RequestImagesTask task = new RequestImagesTask(imageItemList, gridAdapter);
+        task.execute(info);
+        return this.imageItemList;
     }
 
     private void displayContent(){
         setTitle(deviceName + "'s Gallery");
         gridView = (GridView) findViewById(R.id.gridView);
-        gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());
+        // gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());
         gridView.setAdapter(gridAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -233,40 +257,46 @@ public class BrowsePhotosActivity extends ActionBarActivity {
     }
 
     // AsyncTask to request the images
-    private class RequestImagesTask extends AsyncTask<String, Void, ArrayList<ImageItem>> {
+    private class RequestImagesTask extends AsyncTask<JSONObject, Void, ArrayList<ImageItem>> {
 
         private static final String TAG = "Request Image Task";
         private Face mFace;
         private boolean shouldStop = false;
-        private ArrayList<ImageItem> images = new ArrayList<ImageItem>();
+        private ArrayList<ImageItem> images;
         private int seqNumber = Integer.MAX_VALUE;
         private HashMap<Integer, String> results = new HashMap<>();
         private byte[] bitmapData = new byte[0];
+        private GridViewAdapter gridViewAdapter;
+
+        public RequestImagesTask(ArrayList<ImageItem> images, GridViewAdapter gridViewAdapter) {
+            this.gridViewAdapter = gridViewAdapter;
+            this.images = images;
+        }
         @Override
-        protected ArrayList<ImageItem> doInBackground(String... params) {
+        protected ArrayList<ImageItem> doInBackground(JSONObject... params) {
 
             if(params.length < 1) {
                 Log.e(RequestImagesTask.TAG, "No images path");
                 return null;
             }
 
-            String infoString = params[0];
+            JSONObject info = params[0];
             ArrayList<String> filePaths = new ArrayList<>();
             boolean isPublic = true;
             String passcode = "";
             String targetIP = "";
             try {
-                JSONObject info = new JSONObject(infoString);
                 JSONArray array = info.getJSONArray("filePath");
                 for(int i = 0; i < array.length(); ++i) {
                     filePaths.add(array.getString(i));
                 }
                 isPublic = info.getBoolean("isPublic");
-                passcode = info.getString("passcode");
+                if(isPublic == false)
+                    passcode = info.getString("passcode");
                 targetIP = info.getString("targetIP");
 
             } catch (JSONException e) {
-                Log.e(RequestImagesTask.TAG, "JSON Error");
+                Log.e(RequestImagesTask.TAG, e.toString());
             }
 
             try {
@@ -284,15 +314,16 @@ public class BrowsePhotosActivity extends ActionBarActivity {
                     final Name requestName;
 
                     if(isPublic == true) {
-                        requestName = new Name("/" + targetIP + "/public/" + filename);
+                        requestName = new Name(targetIP + "/public/" + filename);
                     }
                     else {
-                        requestName = new Name("/" + targetIP + "/" + passcode + "/" + filename);
+                        requestName = new Name(targetIP + "/" + passcode + "/" + filename);
                     }
 
-                    requestName.appendSequenceNumber(1);
-                    Interest interest =  new Interest(requestName);
-                    interest.setInterestLifetimeMilliseconds(10000);
+                    Name firstRequest = new Name(requestName);
+                    firstRequest.appendSequenceNumber(1);
+                    Interest interest = new Interest(firstRequest);
+                    interest.setInterestLifetimeMilliseconds(20000);
                     mFace.expressInterest(interest, new OnData() {
                         @Override
                         public void onData(Interest interest, Data data) {
@@ -350,6 +381,7 @@ public class BrowsePhotosActivity extends ActionBarActivity {
                         @Override
                         public void onTimeout(Interest interest) {
                             Log.e(RequestImagesTask.TAG, "Time out");
+                            shouldStop = true;
                         }
                     });
 
@@ -386,7 +418,9 @@ public class BrowsePhotosActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(ArrayList<ImageItem> imageItems) {
             super.onPostExecute(imageItems);
-            imageItemList = imageItems;
+            // imageItemList = imageItems;
+            images = imageItems;
+            gridViewAdapter.notifyDataSetChanged();
         }
     }
 
