@@ -211,6 +211,7 @@ public class DeviceListActivity extends ActionBarActivity {
                 intent.putExtra("info", jsonObject.toString());
             }
             Log.i(RequestInfo.TAG, intent.toString());
+            Log.i(RequestInfo.TAG, jsonObject.toString());
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }
