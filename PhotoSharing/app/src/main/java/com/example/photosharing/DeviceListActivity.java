@@ -42,11 +42,8 @@ public class DeviceListActivity extends ActionBarActivity {
     private PhotoSharingApplication app;
 
     private ListView listView;
-    private List<String> deviceDisplayList;
+    //private List<String> deviceDisplayList;
     private JSONObject info;
-
-    private boolean isPublic;
-    private String passcode;
 
     SimpleAdapter adapter;
     ArrayList<HashMap<String, Object>> displayContent;
@@ -67,8 +64,10 @@ public class DeviceListActivity extends ActionBarActivity {
 //        DeviceInfo dummy = new DeviceInfo("192.168.1.1", "dummyDevice" );
 //        deviceList_debug.add(dummy);
 
-        if ( deviceList.isEmpty() )
+        if ( deviceList.isEmpty() ) {
+            Log.i(TAG, "device list is empty");
             Toast.makeText(getApplicationContext(), "No device discoverable", Toast.LENGTH_LONG).show();
+        }
         else {
             Toast.makeText(getApplicationContext(), "Your own IP address: " + app.getMyAddress(), Toast.LENGTH_LONG).show();
 
@@ -109,7 +108,7 @@ public class DeviceListActivity extends ActionBarActivity {
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String targetIP = deviceDisplayList.get(position);
+                    String targetIP = deviceList.get(position).ipAddress;
                     Log.i("Target IP", "" + targetIP);
                     intent = new Intent(DeviceListActivity.this, BrowsePhotosActivity.class);
                     intent.putExtra("deviceName", deviceList.get(position).deviceName);
@@ -119,12 +118,6 @@ public class DeviceListActivity extends ActionBarActivity {
                     //get /target/info, isPublic, passcode
                     RequestInfo task = new RequestInfo(getApplicationContext());
                     task.execute(targetIP);
-                    // intent.putExtra("isPublic", isPublic);
-                    // String passcode = "";
-                    // if (passcode.equals(""))
-                    //    passcode = "123";
-                    // intent.putExtra("passcode", passcode);
-                    // intent.putExtra("info", info.toString());
                     startActivity(intent);
                 }
             });
@@ -145,10 +138,6 @@ public class DeviceListActivity extends ActionBarActivity {
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("device_name", deviceList.get(i).deviceName);
             map.put("device_ip", deviceList.get(i).ipAddress);
-//                if isPublic
-//                       map.put("isPublic", R.drawable....)
-//                else
-//                        map.put()
             displayContent.add(map);
             Log.i(TAG, "decive list index: " + i);
         }
@@ -280,4 +269,5 @@ public class DeviceListActivity extends ActionBarActivity {
         }
         return keyChain;
     }
+
 }

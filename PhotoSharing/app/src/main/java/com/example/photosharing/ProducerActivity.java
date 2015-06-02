@@ -26,6 +26,7 @@ import net.named_data.jndn.OnTimeout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class ProducerActivity extends ActionBarActivity implements ProducerActivityFragment.ProducerActionListener{
@@ -41,6 +42,7 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
 
     private ListView listView;
     private ArrayList<HashMap<String, Object>> displayContent;
+    private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
     private SimpleAdapter adapter;
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
@@ -84,7 +86,8 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                WifiP2pDevice device = (WifiP2pDevice) displayContent.get(position).values();
+                WifiP2pDevice device = peers.get(position);
+                //WifiP2pDevice device = (WifiP2pDevice) displayContent.get(position).values();
 
                 WifiP2pConfig config = new WifiP2pConfig();
                 config.deviceAddress = device.deviceAddress;
@@ -180,7 +183,15 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     public void addDisplayContent(HashMap<String, Object> map){
         displayContent.add(map);
     }
+
     public void notifyDataSetChanged(){
         adapter.notifyDataSetChanged();
     }
+    public void cleerPeers(){
+        peers.clear();
+    }
+    public void addPeers(WifiP2pDevice p){
+        peers.add(p);
+    }
+
 }

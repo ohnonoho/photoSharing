@@ -170,6 +170,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
 
         ((ProducerActivity)getActivity()).clearDisplayContent();
+        ((ProducerActivity)getActivity()).cleerPeers();
         //this.activity.displayContent.clear();
         ArrayList<WifiP2pDevice> devList = new ArrayList<WifiP2pDevice>();
         devList.addAll(peerList.getDeviceList());
@@ -186,6 +187,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
             map.put("device_status", getDeviceStatus(device.status));
             //(ProducerActivity getActivity()).addDisplayContent();
             ((ProducerActivity)getActivity()).addDisplayContent(map);
+            ((ProducerActivity)getActivity()).addPeers(device);
             //this.activity.displayContent.add(map);
             Log.e(TAG, "displaycontent + " + i);
         }
@@ -204,6 +206,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         ((WiFiPeerListAdapter)getListAdapter()).notifyDataSetChanged();
         ((ProducerActivity)getActivity()).clearDisplayContent();
         ((ProducerActivity)getActivity()).notifyDataSetChanged();
+        ((ProducerActivity)getActivity()).cleerPeers();
 //        activity.displayContent.clear();
 //        activity.adapter.notifyDataSetChanged();
     }
