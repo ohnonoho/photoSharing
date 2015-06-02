@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -58,23 +59,49 @@ public class DeviceListActivity extends ActionBarActivity {
         app = (PhotoSharingApplication) this.getApplication();
 
         final ArrayList<DeviceInfo> deviceList = app.getDeviceList();
+
+//        ArrayList<DeviceInfo> deviceList_debug = new ArrayList<DeviceInfo>();
+//        DeviceInfo dummy = new DeviceInfo("192.168.1.1", "dummyDevice" );
+//        deviceList_debug.add(dummy);
+
         if ( deviceList.isEmpty() )
             Toast.makeText(getApplicationContext(), "No device discoverable", Toast.LENGTH_LONG).show();
         else {
+            Toast.makeText(getApplicationContext(), "Your own IP address: " + app.getMyAddress(), Toast.LENGTH_LONG).show();
 
-            deviceDisplayList = new ArrayList<String>();// this is the array of string which is used by listview adapter
-            // filePaths = new ArrayList<>(); // this is the array of filepath name to request the images
-            int i = 0;
-            for (i = 0; i < deviceList.size(); i++) {
-                deviceDisplayList.add(deviceList.get(i).ipAddress);
-                Log.i(TAG, "decive list index: " + i);
-            }
+            // These are the code for ArrayAdapter
+            //deviceDisplayList = new ArrayList<String>();// this is the array of string which is used by listview adapter//
+//            int i = 0;
+//            for (i = 0; i < deviceList.size(); i++) {
+//                deviceDisplayList.add(deviceList.get(i).ipAddress);
+//                Log.i(TAG, "decive list index: " + i);
+//            }
+            //listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, deviceDisplayList));
 //            SimpleAdapter adapter = new SimpleAdapter(this, getData() ,R.layout.vlist,
 //                                        new String[]{"title","info","img"},
 //                                        new int[]{R.id.title,R.id.info,R.id.img});
 
+            ArrayList<HashMap<String, Object>> displayContent = new ArrayList<HashMap<String, Object>>();
+
+            //final ArrayList<DeviceInfo> deviceList = deviceList_debug;
+            for (int i = 0; i < deviceList.size(); i++) {
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("device_name", deviceList.get(i).deviceName);
+                map.put("device_ip", deviceList.get(i).ipAddress);
+//                if isPublic
+//                       map.put("isPublic", R.drawable....)
+//                else
+//                        map.put()
+                displayContent.add(map);
+                Log.i(TAG, "decive list index: " + i);
+            }
             listView = new ListView(this);
-            listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, deviceDisplayList));
+
+
+            SimpleAdapter adapter = new SimpleAdapter(this, displayContent,R.layout.listview_content,
+                                        new String[]{"device_name","device_ip"},
+                                        new int[]{R.id.device_name, R.id.device_ip});
+            listView.setAdapter(adapter);
             setContentView(listView);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -87,18 +114,15 @@ public class DeviceListActivity extends ActionBarActivity {
                     //get info from the device
                     //do something on NFD !!!!!
                     //get /target/info, isPublic, passcode
-
                     RequestInfo task = new RequestInfo(getApplicationContext());
                     task.execute(targetIP);
-
                     // intent.putExtra("isPublic", isPublic);
                     // String passcode = "";
                     // if (passcode.equals(""))
                     //    passcode = "123";
                     // intent.putExtra("passcode", passcode);
                     // intent.putExtra("info", info.toString());
-
-                    // startActivity(intent);
+                    startActivity(intent);
                 }
             });
         }
