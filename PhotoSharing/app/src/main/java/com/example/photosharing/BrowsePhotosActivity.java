@@ -146,25 +146,25 @@ public class BrowsePhotosActivity extends ActionBarActivity {
 //        task.execute(info);
     }
 
-    private ArrayList<ImageItem> getData() {
-        // use the device name to retrive photos from the other device
-        //do something on NFD !!!!!
-        //use targetPhotoPrefix to get photos
-//        Log.e(TAG, "targetPhotoPrefix:" + targetPhotoPrefix);
-//        final ArrayList<ImageItem> imageItems = new ArrayList<>();
-//        TypedArray imgs = getResources().obtainTypedArray(R.array.image_ids);
-//        for (int i = 0; i < imgs.length(); i++) {
-//            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), imgs.getResourceId(i, -1));
-//            imageItems.add(new ImageItem(bitmap, "Image#" + i));
-//        }
-        RequestImagesTask task = new RequestImagesTask(imageItemList, gridAdapter);
-        task.execute(info);
-        return this.imageItemList;
-    }
+//    private ArrayList<ImageItem> getData() {
+//        // use the device name to retrive photos from the other device
+//        //do something on NFD !!!!!
+//        //use targetPhotoPrefix to get photos
+////        Log.e(TAG, "targetPhotoPrefix:" + targetPhotoPrefix);
+////        final ArrayList<ImageItem> imageItems = new ArrayList<>();
+////        TypedArray imgs = getResources().obtainTypedArray(R.array.image_ids);
+////        for (int i = 0; i < imgs.length(); i++) {
+////            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), imgs.getResourceId(i, -1));
+////            imageItems.add(new ImageItem(bitmap, "Image#" + i));
+////        }
+//        RequestImagesTask task = new RequestImagesTask(imageItemList, gridAdapter;
+//        task.execute(info);
+//        return this.imageItemList;
+//    }
 
     private void displayContent(){
 
-        RequestImagesTask task = new RequestImagesTask(imageItemList, gridAdapter);
+        RequestImagesTask task = new RequestImagesTask(imageItemList, gridAdapter, (PhotoSharingApplication)getApplication());
         task.execute(info);
 
         setTitle(deviceName + "'s Gallery");
@@ -271,10 +271,12 @@ public class BrowsePhotosActivity extends ActionBarActivity {
         private HashMap<Integer, String> results = new HashMap<>();
         private byte[] bitmapData = new byte[0];
         private GridViewAdapter gridViewAdapter;
+        private PhotoSharingApplication app;
 
-        public RequestImagesTask(ArrayList<ImageItem> images, GridViewAdapter gridViewAdapter) {
+        public RequestImagesTask(ArrayList<ImageItem> images, GridViewAdapter gridViewAdapter, PhotoSharingApplication app) {
             this.gridViewAdapter = gridViewAdapter;
             this.images = images;
+            this.app = app;
         }
         @Override
         protected ArrayList<ImageItem> doInBackground(JSONObject... params) {
@@ -305,7 +307,8 @@ public class BrowsePhotosActivity extends ActionBarActivity {
             }
 
             try {
-                final KeyChain keyChain = buildTestKeyChain();
+                // final KeyChain keyChain = buildTestKeyChain();
+                final KeyChain keyChain = app.keyChain;
                 mFace = new Face("localhost");
                 mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
                 for(String path : filePaths) {

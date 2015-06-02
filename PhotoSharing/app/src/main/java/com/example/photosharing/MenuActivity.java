@@ -29,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.Key;
 import java.util.ArrayList;
 
 
@@ -166,7 +167,8 @@ public class MenuActivity extends ActionBarActivity {
         protected ArrayList<DeviceInfo> doInBackground(String... params) {
 
             try {
-                KeyChain keyChain = buildTestKeyChain();
+                // KeyChain keyChain = buildTestKeyChain();
+                KeyChain keyChain = app.keyChain;
                 mFace = new Face("localhost");
                 mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 

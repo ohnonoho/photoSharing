@@ -17,6 +17,7 @@ import net.named_data.jndn.OnInterest;
 import net.named_data.jndn.OnRegisterFailed;
 import net.named_data.jndn.encoding.EncodingException;
 import net.named_data.jndn.security.*;
+import net.named_data.jndn.security.SecurityException;
 import net.named_data.jndn.security.identity.IdentityManager;
 import net.named_data.jndn.security.identity.MemoryIdentityStorage;
 import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
@@ -48,9 +49,15 @@ public class ProducerService extends IntentService {
     private String passcode = "";
     private String mAddress = "";
     private String oAddress = "";
+    private KeyChain keyChain;
 
     public ProducerService() {
         super("ProducerService");
+        try {
+            keyChain = buildTestKeyChain();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
     }
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -91,7 +98,7 @@ public class ProducerService extends IntentService {
 
 
 
-            KeyChain keyChain = buildTestKeyChain();
+            // KeyChain keyChain = buildTestKeyChain();
             mFace = new Face("localhost");
             mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 

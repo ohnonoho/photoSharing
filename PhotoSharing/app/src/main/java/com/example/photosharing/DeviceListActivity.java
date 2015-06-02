@@ -88,7 +88,7 @@ public class DeviceListActivity extends ActionBarActivity {
                     //do something on NFD !!!!!
                     //get /target/info, isPublic, passcode
 
-                    RequestInfo task = new RequestInfo(getApplicationContext());
+                    RequestInfo task = new RequestInfo(getApplicationContext(), (PhotoSharingApplication)getApplication());
                     task.execute(targetIP);
 
                     // intent.putExtra("isPublic", isPublic);
@@ -145,16 +145,19 @@ public class DeviceListActivity extends ActionBarActivity {
         private boolean shouldStop = false;
 
         Context context;
+        private PhotoSharingApplication app;
 
-        public RequestInfo(Context context) {
+        public RequestInfo(Context context, PhotoSharingApplication app) {
             this.context = context;
+            this.app = app;
         }
         @Override
         protected JSONObject doInBackground(String... params) {
 
             try {
                 // Send the interest to /oAddres/info
-                KeyChain keyChain = buildTestKeyChain();
+                // KeyChain keyChain = buildTestKeyChain();
+                KeyChain keyChain = app.keyChain;
                 mFace = new Face("localhost");
                 mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 
