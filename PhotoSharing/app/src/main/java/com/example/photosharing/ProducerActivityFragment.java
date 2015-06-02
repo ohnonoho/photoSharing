@@ -84,15 +84,16 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
+        Log.e(TAG, "onAttach");
         //this.activity = (ProducerActivity)activity;
-
-        Log.e(TAG, "display content. size:" + ((ProducerActivity)getActivity()).getDisplayContent().size());
+        //ArrayList<HashMap<String, Object>> a = ((ProducerActivity)getActivity()).getDisplayContent();
+        //Log.e(TAG, "display content. size:" + ((ProducerActivity)getActivity()).getDisplayContent().size());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.e(TAG, "onCreateView");
         mView = inflater.inflate(R.layout.fragment_producer, container, false);
 
         this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.list_item, peers));

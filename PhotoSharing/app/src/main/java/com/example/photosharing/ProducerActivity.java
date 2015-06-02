@@ -1,7 +1,9 @@
 package com.example.photosharing;
 
 import android.content.IntentFilter;
+import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.StrictMode;
 import android.support.v7.app.ActionBarActivity;
@@ -9,6 +11,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -47,6 +51,7 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_producer);
+        Log.e(TAG, "Oncreate");
         //setContentView(R.layout.activity_producer);
 
         // Indicate a change in the Wi-Fi P2P status
@@ -75,6 +80,18 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
                 new int[]{R.id.device_name, R.id.device_ip, R.id.device_status});
         listView.setAdapter(adapter);
         setContentView(listView);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                WifiP2pDevice device = (WifiP2pDevice) displayContent.get(position).values();
+
+                WifiP2pConfig config = new WifiP2pConfig();
+                config.deviceAddress = device.deviceAddress;
+                config.wps.setup = WpsInfo.PBC;
+                ((ProducerActivityFragment.ProducerActionListener) ProducerActivity.this).connect(config);
+            }
+        });
     }
 
 
