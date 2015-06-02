@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import net.named_data.jndn.Data;
@@ -17,6 +19,9 @@ import net.named_data.jndn.Interest;
 import net.named_data.jndn.Name;
 import net.named_data.jndn.OnData;
 import net.named_data.jndn.OnTimeout;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class ProducerActivity extends ActionBarActivity implements ProducerActivityFragment.ProducerActionListener{
@@ -29,6 +34,9 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     private WiFiDirectBroadcast mReceiver;
 
     private boolean isWifiP2pEnabled = false;
+
+    private ListView listView;
+    public ArrayList<HashMap<String, Object>> displayContent;
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
@@ -57,6 +65,15 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
         mReceiver = new WiFiDirectBroadcast(mManager, mChannel, this);
 
         Log.d(this.TAG, "Start to discover peers");
+
+        //for display purpose
+        listView = new ListView(this);
+        displayContent = new ArrayList<HashMap<String, Object>> ();
+        SimpleAdapter adapter = new SimpleAdapter(this, displayContent,R.layout.listview_content,
+                new String[]{"device_name","device_ip", "device_status"},
+                new int[]{R.id.device_name, R.id.device_ip, R.id.device_status});
+        listView.setAdapter(adapter);
+        setContentView(listView);
     }
 
 

@@ -1,5 +1,6 @@
 package com.example.photosharing;
 
+import android.app.Activity;
 import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
@@ -73,7 +74,15 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     HashMap<String, String> prefixMap = new HashMap<>();
     HashMap<String, String> dataMap = new HashMap<>();
 
+    private ProducerActivity activity;
+
     public ProducerActivityFragment() {
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        this.activity = (ProducerActivity)activity;
     }
 
     @Override
@@ -230,6 +239,13 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
                 top.setText("Name: " + device.deviceName + ", Address: " + device.deviceAddress);
                 bottom.setText(getDeviceStatus(device.status));
+
+
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("device_name", device.deviceName);
+                map.put("device_ip", device.deviceAddress);
+                activity.displayContent.add(map);
+
             }
             return v;
         }
@@ -241,6 +257,12 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         top.setText("Device: " + device.deviceName + ", Address: " + device.deviceAddress);
         TextView bottom = (TextView) mView.findViewById(R.id.producer_status);
         bottom.setText("Status: " + getDeviceStatus(device.status));
+
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("device_name", device.deviceName);
+        map.put("device_ip", device.deviceAddress);
+        map.put("device_status", getDeviceStatus(device.status));
+        activity.displayContent.add(map);
     }
 
     public void updateGroupOwner(boolean isOwner, String oAddress) {
