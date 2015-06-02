@@ -82,22 +82,26 @@ public class BrowsePhotosActivity extends ActionBarActivity {
             if(jsonString != null) {
                 info = new JSONObject(jsonString);
                 deviceName = intent.getStringExtra("deviceName");
-                isPublic = intent.getBooleanExtra("isPublic", true);
-                passcode = intent.getStringExtra("passcode");
+                // isPublic = intent.getBooleanExtra("isPublic", true);
+                // passcode = intent.getStringExtra("passcode");
                 targetIP = intent.getStringExtra("targetIP");
                 info.put("deviceName", deviceName);
-                info.put("isPublic", isPublic);
-                info.put("passcode", passcode);
+                // info.put("isPublic", isPublic);
+                // info.put("passcode", passcode);
                 info.put("targetIP", targetIP);
                 Log.i("JSON", info.toString());
+
+                isPublic = info.getBoolean("isPublic");
+                passcode = info.getString("passcode");
             }
         } catch (JSONException e) {
             Log.i("On Create", e.toString());
         }
         Log.i("Shwo Images", targetIP);
+        Log.i("IsPublic", "" + isPublic);
 
         // the cotent that someone is sharing is public
-        if (isPublic ) {
+        if (isPublic) {
             targetPhotoPrefix = deviceName + "/public";
             displayContent();
         }
@@ -138,12 +142,8 @@ public class BrowsePhotosActivity extends ActionBarActivity {
             dialog.show();
         }
 
-        RequestImagesTask task = new RequestImagesTask(imageItemList, gridAdapter);
-        task.execute(info);
-
-
-
-
+//        RequestImagesTask task = new RequestImagesTask(imageItemList, gridAdapter);
+//        task.execute(info);
     }
 
     private ArrayList<ImageItem> getData() {
@@ -163,6 +163,10 @@ public class BrowsePhotosActivity extends ActionBarActivity {
     }
 
     private void displayContent(){
+
+        RequestImagesTask task = new RequestImagesTask(imageItemList, gridAdapter);
+        task.execute(info);
+
         setTitle(deviceName + "'s Gallery");
         gridView = (GridView) findViewById(R.id.gridView);
         // gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, getData());
@@ -281,6 +285,7 @@ public class BrowsePhotosActivity extends ActionBarActivity {
             }
 
             JSONObject info = params[0];
+            Log.i(RequestImagesTask.TAG, info.toString());
             ArrayList<String> filePaths = new ArrayList<>();
             boolean isPublic = true;
             String passcode = "";
