@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -162,6 +163,27 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         Log.d(ProducerActivity.TAG, peerList.toString());
 
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+
+        activity.displayContent.clear();
+        ArrayList<WifiP2pDevice> devList = new ArrayList<WifiP2pDevice>();
+        devList.addAll(peerList.getDeviceList());
+        for (int i = 0 ; i < devList.size() ; i++){
+            //updateDisplayContent(devList.get(i), false);
+            boolean isOwner = false;
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            WifiP2pDevice device = devList.get(i);
+            if (isOwner)
+                map.put("device_name", device.deviceName + " (GroupOwner)");
+            else
+                map.put("device_name", device.deviceName);
+            map.put("device_ip", device.deviceAddress);
+            map.put("device_status", getDeviceStatus(device.status));
+            activity.displayContent.add(map);
+            Log.e("DEBUG", "displaycontent + " + i);
+        }
+        Log.e("DEBUG", "notify data changed");
+        activity.adapter.notifyDataSetChanged();
+
         if (peers.size() == 0) {
             Log.d(ProducerActivity.TAG, "No devices found");
             return;
@@ -287,18 +309,6 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
             map.put("device_name", device.deviceName);
         map.put("device_ip", device.deviceAddress);
         map.put("device_status", getDeviceStatus(device.status));
-        activity.displayContent.add(map);
-        activity.adapter.notifyDataSetChanged();
-    }
-
-    public void updateDisplayContent(String deviceName, String deviceAddress, String deviceStatus, boolean isOwner){
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        if (isOwner)
-            map.put("device_name", deviceName + " (GroupOwner)");
-        else
-            map.put("device_name", deviceName);
-        map.put("device_ip", deviceAddress);
-        map.put("device_status", deviceStatus);
         activity.displayContent.add(map);
         activity.adapter.notifyDataSetChanged();
     }
