@@ -138,7 +138,7 @@ public class MenuActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        wifiDirectConnected = true; // for test purpose, enable the two buttons on main menu page
+        //wifiDirectConnected = true; // for test purpose, enable the two buttons on main menu page
         if (wifiDirectConnected){
             btnGetPhotos.setEnabled(true);
             btnGetPhotos.setBackground(getResources().getDrawable(R.drawable.btnviewothersenable));

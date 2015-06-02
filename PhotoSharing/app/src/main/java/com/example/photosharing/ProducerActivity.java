@@ -37,6 +37,7 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
 
     private ListView listView;
     public ArrayList<HashMap<String, Object>> displayContent;
+    public SimpleAdapter adapter;
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
@@ -69,7 +70,7 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
         //for display purpose
         listView = new ListView(this);
         displayContent = new ArrayList<HashMap<String, Object>> ();
-        SimpleAdapter adapter = new SimpleAdapter(this, displayContent,R.layout.listview_content,
+        adapter = new SimpleAdapter(this, displayContent,R.layout.listview_content,
                 new String[]{"device_name","device_ip", "device_status"},
                 new int[]{R.id.device_name, R.id.device_ip, R.id.device_status});
         listView.setAdapter(adapter);

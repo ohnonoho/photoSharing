@@ -48,6 +48,9 @@ public class DeviceListActivity extends ActionBarActivity {
     private boolean isPublic;
     private String passcode;
 
+    SimpleAdapter adapter;
+    ArrayList<HashMap<String, Object>> displayContent;
+
     private Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +84,7 @@ public class DeviceListActivity extends ActionBarActivity {
 //                                        new String[]{"title","info","img"},
 //                                        new int[]{R.id.title,R.id.info,R.id.img});
 
-            ArrayList<HashMap<String, Object>> displayContent = new ArrayList<HashMap<String, Object>>();
+            displayContent = new ArrayList<HashMap<String, Object>>();
 
             //final ArrayList<DeviceInfo> deviceList = deviceList_debug;
             for (int i = 0; i < deviceList.size(); i++) {
@@ -98,7 +101,7 @@ public class DeviceListActivity extends ActionBarActivity {
             listView = new ListView(this);
 
 
-            SimpleAdapter adapter = new SimpleAdapter(this, displayContent,R.layout.listview_content,
+            adapter = new SimpleAdapter(this, displayContent,R.layout.listview_content,
                                         new String[]{"device_name","device_ip"},
                                         new int[]{R.id.device_name, R.id.device_ip});
             listView.setAdapter(adapter);
@@ -128,6 +131,29 @@ public class DeviceListActivity extends ActionBarActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
+        app = (PhotoSharingApplication) this.getApplication();
+        final ArrayList<DeviceInfo> deviceList = app.getDeviceList();
+        displayContent.clear();
+        ArrayList<HashMap<String, Object>> displayContent = new ArrayList<HashMap<String, Object>>();
+        //final ArrayList<DeviceInfo> deviceList = deviceList_debug;
+        for (int i = 0; i < deviceList.size(); i++) {
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            map.put("device_name", deviceList.get(i).deviceName);
+            map.put("device_ip", deviceList.get(i).ipAddress);
+//                if isPublic
+//                       map.put("isPublic", R.drawable....)
+//                else
+//                        map.put()
+            displayContent.add(map);
+            Log.i(TAG, "decive list index: " + i);
+        }
+        adapter.notifyDataSetChanged();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

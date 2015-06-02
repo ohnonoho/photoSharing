@@ -245,6 +245,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 map.put("device_name", device.deviceName);
                 map.put("device_ip", device.deviceAddress);
                 activity.displayContent.add(map);
+                activity.adapter.notifyDataSetChanged();
 
             }
             return v;
@@ -258,11 +259,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         TextView bottom = (TextView) mView.findViewById(R.id.producer_status);
         bottom.setText("Status: " + getDeviceStatus(device.status));
 
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        map.put("device_name", device.deviceName);
-        map.put("device_ip", device.deviceAddress);
-        map.put("device_status", getDeviceStatus(device.status));
-        activity.displayContent.add(map);
+
     }
 
     public void updateGroupOwner(boolean isOwner, String oAddress) {
@@ -272,6 +269,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         groupOwnerAddress.setText("Owner Address: " + oAddress);
         TextView ownerStatus = (TextView) mView.findViewById(R.id.owner_status);
         ownerStatus.setText("Owner Status: " + isOwner);
+
     }
 
     public void updateMyAddress(String addr) {
@@ -279,6 +277,30 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 //        groupOwnerName.setText("Owner Name: " + name);
         TextView myAddress = (TextView) mView.findViewById(R.id.my_address);
         myAddress.setText("My Address: " + addr);
+    }
+
+    public void updateDisplayContent(WifiP2pDevice device, boolean isOwner){
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        if (isOwner)
+            map.put("device_name", device.deviceName + " (GroupOwner)");
+        else
+            map.put("device_name", device.deviceName);
+        map.put("device_ip", device.deviceAddress);
+        map.put("device_status", getDeviceStatus(device.status));
+        activity.displayContent.add(map);
+        activity.adapter.notifyDataSetChanged();
+    }
+
+    public void updateDisplayContent(String deviceName, String deviceAddress, String deviceStatus, boolean isOwner){
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        if (isOwner)
+            map.put("device_name", deviceName + " (GroupOwner)");
+        else
+            map.put("device_name", deviceName);
+        map.put("device_ip", deviceAddress);
+        map.put("device_status", deviceStatus);
+        activity.displayContent.add(map);
+        activity.adapter.notifyDataSetChanged();
     }
 
     public interface ProducerActionListener {
