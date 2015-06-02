@@ -1,7 +1,9 @@
 package com.example.photosharing;
 
 import android.content.IntentFilter;
+import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.StrictMode;
 import android.support.v7.app.ActionBarActivity;
@@ -9,6 +11,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import net.named_data.jndn.Data;
@@ -17,6 +23,10 @@ import net.named_data.jndn.Interest;
 import net.named_data.jndn.Name;
 import net.named_data.jndn.OnData;
 import net.named_data.jndn.OnTimeout;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 public class ProducerActivity extends ActionBarActivity implements ProducerActivityFragment.ProducerActionListener{
@@ -30,6 +40,11 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
 
     private boolean isWifiP2pEnabled = false;
 
+    private ListView listView;
+    private ArrayList<HashMap<String, Object>> displayContent;
+    private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
+    private SimpleAdapter adapter;
+
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
     }
@@ -38,6 +53,7 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_producer);
+        Log.e(TAG, "Oncreate");
         //setContentView(R.layout.activity_producer);
 
         // Indicate a change in the Wi-Fi P2P status
@@ -57,6 +73,28 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
         mReceiver = new WiFiDirectBroadcast(mManager, mChannel, this);
 
         Log.d(this.TAG, "Start to discover peers");
+
+        //for display purpose
+        listView = new ListView(this);
+        displayContent = new ArrayList<HashMap<String, Object>> ();
+        adapter = new SimpleAdapter(this, displayContent,R.layout.listview_content,
+                new String[]{"device_name","device_ip", "device_status"},
+                new int[]{R.id.device_name, R.id.device_ip, R.id.device_status});
+        listView.setAdapter(adapter);
+        setContentView(listView);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                WifiP2pDevice device = peers.get(position);
+                //WifiP2pDevice device = (WifiP2pDevice) displayContent.get(position).values();
+
+                WifiP2pConfig config = new WifiP2pConfig();
+                config.deviceAddress = device.deviceAddress;
+                config.wps.setup = WpsInfo.PBC;
+                ((ProducerActivityFragment.ProducerActionListener) ProducerActivity.this).connect(config);
+            }
+        });
     }
 
 
@@ -86,6 +124,8 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     protected void onResume() {
         super.onResume();
         registerReceiver(mReceiver, intentFilter);
+
+        Log.e(TAG, "display content. size:" + displayContent.size());
 
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
 
@@ -133,4 +173,25 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     public String getOwnerIPAddress() {
         return mReceiver.oAddress;
     }
+
+    public ArrayList<HashMap<String, Object>> getDisplayContent(){
+        return displayContent;
+    }
+    public void clearDisplayContent(){
+        displayContent.clear();
+    }
+    public void addDisplayContent(HashMap<String, Object> map){
+        displayContent.add(map);
+    }
+
+    public void notifyDataSetChanged(){
+        adapter.notifyDataSetChanged();
+    }
+    public void cleerPeers(){
+        peers.clear();
+    }
+    public void addPeers(WifiP2pDevice p){
+        peers.add(p);
+    }
+
 }

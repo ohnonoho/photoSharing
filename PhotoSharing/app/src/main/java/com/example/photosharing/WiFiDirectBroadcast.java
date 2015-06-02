@@ -117,6 +117,8 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                     mProducerActivity.getFragmentManager().findFragmentById(R.id.producer_fragment);
             fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));
             myself = (WifiP2pDevice) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+
+            //fragment.updateDisplayContent(myself, false);
         }
     }
 
@@ -242,6 +244,7 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         Log.i(ProducerActivity.TAG, "Register status: " + returnData);
                         fragment.updateGroupOwner(isOwner, oAddress);
                         fragment.updateMyAddress(localIP);
+                        //fragment.updateDisplayContent("myself", localIP, returnData, isOwner);
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.e(ProducerActivity.TAG, e.toString());
