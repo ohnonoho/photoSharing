@@ -39,7 +39,7 @@
             android:fontFamily="@string/action_settings"
             android:typeface="serif"
             android:layout_marginLeft="10dp"
-            android:textSize="@dimen/abc_text_size_small_material"
+            android:textSize="16dp"
             />
 
         </LinearLayout>

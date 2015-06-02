@@ -67,6 +67,7 @@ import org.json.JSONObject;
  */
 public class ProducerActivityFragment extends ListFragment implements PeerListListener{
 
+    private String TAG = "ProducerActivityFragment";
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
     private WifiP2pDevice device = null;
     private View mView = null;
@@ -75,7 +76,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     HashMap<String, String> prefixMap = new HashMap<>();
     HashMap<String, String> dataMap = new HashMap<>();
 
-    private ProducerActivity activity;
+    //private ProducerActivity activity;
 
     public ProducerActivityFragment() {
     }
@@ -83,7 +84,10 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.activity = (ProducerActivity)activity;
+
+        //this.activity = (ProducerActivity)activity;
+
+        Log.e(TAG, "display content. size:" + ((ProducerActivity)getActivity()).getDisplayContent().size());
     }
 
     @Override
@@ -164,7 +168,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
 
-        activity.displayContent.clear();
+        ((ProducerActivity)getActivity()).clearDisplayContent();
+        //this.activity.displayContent.clear();
         ArrayList<WifiP2pDevice> devList = new ArrayList<WifiP2pDevice>();
         devList.addAll(peerList.getDeviceList());
         for (int i = 0 ; i < devList.size() ; i++){
@@ -178,12 +183,15 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 map.put("device_name", device.deviceName);
             map.put("device_ip", device.deviceAddress);
             map.put("device_status", getDeviceStatus(device.status));
-            activity.displayContent.add(map);
-            Log.e("DEBUG", "displaycontent + " + i);
+            //(ProducerActivity getActivity()).addDisplayContent();
+            ((ProducerActivity)getActivity()).addDisplayContent(map);
+            //this.activity.displayContent.add(map);
+            Log.e(TAG, "displaycontent + " + i);
         }
-        Log.e("DEBUG", "notify data changed");
-        activity.adapter.notifyDataSetChanged();
+        Log.e(TAG, "notify data changed");
 
+        //this.activity.adapter.notifyDataSetChanged();
+        ((ProducerActivity)getActivity()).notifyDataSetChanged();
         if (peers.size() == 0) {
             Log.d(ProducerActivity.TAG, "No devices found");
             return;
@@ -193,6 +201,10 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     public void clearPeers() {
         peers.clear();
         ((WiFiPeerListAdapter)getListAdapter()).notifyDataSetChanged();
+        ((ProducerActivity)getActivity()).clearDisplayContent();
+        ((ProducerActivity)getActivity()).notifyDataSetChanged();
+//        activity.displayContent.clear();
+//        activity.adapter.notifyDataSetChanged();
     }
 
     public WifiP2pDevice getDevice() {
@@ -266,8 +278,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
                 HashMap<String, Object> map = new HashMap<String, Object>();
                 map.put("device_name", device.deviceName);
                 map.put("device_ip", device.deviceAddress);
-                activity.displayContent.add(map);
-                activity.adapter.notifyDataSetChanged();
+//                activity.displayContent.add(map);
+//                activity.adapter.notifyDataSetChanged();
 
             }
             return v;
@@ -299,18 +311,6 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 //        groupOwnerName.setText("Owner Name: " + name);
         TextView myAddress = (TextView) mView.findViewById(R.id.my_address);
         myAddress.setText("My Address: " + addr);
-    }
-
-    public void updateDisplayContent(WifiP2pDevice device, boolean isOwner){
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        if (isOwner)
-            map.put("device_name", device.deviceName + " (GroupOwner)");
-        else
-            map.put("device_name", device.deviceName);
-        map.put("device_ip", device.deviceAddress);
-        map.put("device_status", getDeviceStatus(device.status));
-        activity.displayContent.add(map);
-        activity.adapter.notifyDataSetChanged();
     }
 
     public interface ProducerActionListener {

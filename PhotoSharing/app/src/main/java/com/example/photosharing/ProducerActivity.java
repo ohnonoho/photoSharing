@@ -36,8 +36,8 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
     private boolean isWifiP2pEnabled = false;
 
     private ListView listView;
-    public ArrayList<HashMap<String, Object>> displayContent;
-    public SimpleAdapter adapter;
+    private ArrayList<HashMap<String, Object>> displayContent;
+    private SimpleAdapter adapter;
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
@@ -105,6 +105,8 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
         super.onResume();
         registerReceiver(mReceiver, intentFilter);
 
+        Log.e(TAG, "display content. size:" + displayContent.size());
+
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
 
             @Override
@@ -150,5 +152,18 @@ public class ProducerActivity extends ActionBarActivity implements ProducerActiv
 
     public String getOwnerIPAddress() {
         return mReceiver.oAddress;
+    }
+
+    public ArrayList<HashMap<String, Object>> getDisplayContent(){
+        return displayContent;
+    }
+    public void clearDisplayContent(){
+        displayContent.clear();
+    }
+    public void addDisplayContent(HashMap<String, Object> map){
+        displayContent.add(map);
+    }
+    public void notifyDataSetChanged(){
+        adapter.notifyDataSetChanged();
     }
 }
