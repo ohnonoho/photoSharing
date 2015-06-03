@@ -1,5 +1,6 @@
 package com.example.photosharing;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -48,6 +49,8 @@ public class DeviceListActivity extends ActionBarActivity {
     SimpleAdapter adapter;
     ArrayList<HashMap<String, Object>> displayContent;
 
+    ProgressDialog progressDialog;
+
     private Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +94,7 @@ public class DeviceListActivity extends ActionBarActivity {
                 if (!deviceList.get(i).ipAddress.equals(app.getMyAddress())) {
                     map.put("device_name", deviceList.get(i).deviceName);
                     map.put("device_ip", deviceList.get(i).ipAddress);
-                    map.put("device_status", "available");
+                    //map.put("device_status", "available");
 //                if isPublic
 //                       map.put("isPublic", R.drawable....)
 //                else
@@ -120,10 +123,13 @@ public class DeviceListActivity extends ActionBarActivity {
                     //do something on NFD !!!!!
                     //get /target/info, isPublic, passcode
 
+                    progressDialog.show(DeviceListActivity.this, "Retrieving photos",  "please wait", true);
+
                     RequestInfo task = new RequestInfo(getApplicationContext(), (PhotoSharingApplication)getApplication());
 
                     task.execute(targetIP);
                     // startActivity(intent);
+                    //progressDialog.dismiss();
                 }
             });
         }
@@ -261,6 +267,7 @@ public class DeviceListActivity extends ActionBarActivity {
             Log.i(RequestInfo.TAG, intent.toString());
             Log.i(RequestInfo.TAG, jsonObject.toString());
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
             context.startActivity(intent);
         }
     }
