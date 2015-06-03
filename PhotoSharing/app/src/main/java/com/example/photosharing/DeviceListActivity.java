@@ -88,15 +88,17 @@ public class DeviceListActivity extends ActionBarActivity {
             //final ArrayList<DeviceInfo> deviceList = deviceList_debug;
             for (int i = 0; i < deviceList.size(); i++) {
                 HashMap<String, Object> map = new HashMap<String, Object>();
-                map.put("device_name", deviceList.get(i).deviceName);
-                map.put("device_ip", deviceList.get(i).ipAddress);
-                map.put("device_status", "available");
+                if (!deviceList.get(i).deviceName.equals(app.getMyDeviceName())) {
+                    map.put("device_name", deviceList.get(i).deviceName);
+                    map.put("device_ip", deviceList.get(i).ipAddress);
+                    map.put("device_status", "available");
 //                if isPublic
 //                       map.put("isPublic", R.drawable....)
 //                else
 //                        map.put()
-                displayContent.add(map);
-                Log.i(TAG, "on create decive list index: " + i);
+                    displayContent.add(map);
+                    Log.i(TAG, "on create decive list index: " + i);
+                }
             }
             listView = new ListView(this);
 
