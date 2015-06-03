@@ -149,10 +149,10 @@ public class ProducerService extends IntentService {
                                     array.put(object);
                                 }
 
-                                JSONObject object = new JSONObject();
-                                object.put("ipAddress", "/"+mAddress);
-                                object.put("deviceName", "owner");
-                                array.put(object);
+//                                JSONObject object = new JSONObject();
+//                                object.put("ipAddress", "/"+mAddress);
+//                                object.put("deviceName", "owner");
+//                                array.put(object);
 
                                 String content = array.toString();
                                 Data data = new Data(requestName);

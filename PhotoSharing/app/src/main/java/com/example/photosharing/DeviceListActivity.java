@@ -90,19 +90,20 @@ public class DeviceListActivity extends ActionBarActivity {
                 HashMap<String, Object> map = new HashMap<String, Object>();
                 map.put("device_name", deviceList.get(i).deviceName);
                 map.put("device_ip", deviceList.get(i).ipAddress);
+                map.put("device_status", "available");
 //                if isPublic
 //                       map.put("isPublic", R.drawable....)
 //                else
 //                        map.put()
                 displayContent.add(map);
-                Log.i(TAG, "decive list index: " + i);
+                Log.i(TAG, "on create decive list index: " + i);
             }
             listView = new ListView(this);
 
 
             adapter = new SimpleAdapter(this, displayContent,R.layout.listview_content,
-                                        new String[]{"device_name","device_ip"},
-                                        new int[]{R.id.device_name, R.id.device_ip});
+                                        new String[]{"device_name","device_ip", "device_status"},
+                                        new int[]{R.id.device_name, R.id.device_ip, R.id.device_status});
             listView.setAdapter(adapter);
             setContentView(listView);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -129,21 +130,22 @@ public class DeviceListActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-
-        app = (PhotoSharingApplication) this.getApplication();
-        final ArrayList<DeviceInfo> deviceList = app.getDeviceList();
-        displayContent.clear();
-        ArrayList<HashMap<String, Object>> displayContent = new ArrayList<HashMap<String, Object>>();
-        //final ArrayList<DeviceInfo> deviceList = deviceList_debug;
-        for (int i = 0; i < deviceList.size(); i++) {
-            HashMap<String, Object> map = new HashMap<String, Object>();
-            map.put("device_name", deviceList.get(i).deviceName);
-            map.put("device_ip", deviceList.get(i).ipAddress);
-            displayContent.add(map);
-            Log.i(TAG, "decive list index: " + i);
-        }
-        adapter.notifyDataSetChanged();
+//
+//
+//        app = (PhotoSharingApplication) this.getApplication();
+//        final ArrayList<DeviceInfo> deviceList = app.getDeviceList();
+//        displayContent.clear();
+//        displayContent = new ArrayList<HashMap<String, Object>>();
+//        //final ArrayList<DeviceInfo> deviceList = deviceList_debug;
+//        for (int i = 0; i < deviceList.size(); i++) {
+//            HashMap<String, Object> map = new HashMap<String, Object>();
+//            map.put("device_name", deviceList.get(i).deviceName);
+//            map.put("device_ip", deviceList.get(i).ipAddress);
+//            map.put("device_status", "available");
+//            displayContent.add(map);
+//            Log.i(TAG, "decive list index: " + i);
+//        }
+//        adapter.notifyDataSetChanged();
     }
 
     @Override

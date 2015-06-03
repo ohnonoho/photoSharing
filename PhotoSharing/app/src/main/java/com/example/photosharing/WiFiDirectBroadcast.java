@@ -241,6 +241,9 @@ public class WiFiDirectBroadcast extends BroadcastReceiver{
                         Log.i(ProducerActivity.TAG, "Owner Address: " + oAddress);
                         app.setMyAddress(localIP);
                         Log.i(ProducerActivity.TAG, "My Address:" + localIP);
+                        if(oAddress.equals(localIP)) {
+                            app.addDevice(localIP, "owner");
+                        }
                         Log.i(ProducerActivity.TAG, "Register status: " + returnData);
                         fragment.updateGroupOwner(isOwner, oAddress);
                         fragment.updateMyAddress(localIP);

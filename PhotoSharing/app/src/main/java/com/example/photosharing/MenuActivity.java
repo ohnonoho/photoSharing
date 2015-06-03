@@ -60,10 +60,6 @@ public class MenuActivity extends ActionBarActivity {
                 //app.addDevice()
                 String oAddress = ((PhotoSharingApplication)getApplication()).getOwnerAddress();
                 String mAddress = ((PhotoSharingApplication)getApplication()).getMyAddress();
-                if (mAddress == null || oAddress == null){
-                    mAddress = "192.168.1.2";
-                    oAddress = "192.168.1.1";
-                }
                 if(!oAddress.equals(mAddress)) {
                     RequestDeviceListTask task = new RequestDeviceListTask((PhotoSharingApplication)getApplication(), getApplicationContext());
                     // String oAddress = ((PhotoSharingApplication) getApplication()).getOwnerAddress();
