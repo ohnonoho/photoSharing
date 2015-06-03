@@ -123,7 +123,7 @@ public class DeviceListActivity extends ActionBarActivity {
                     RequestInfo task = new RequestInfo(getApplicationContext(), (PhotoSharingApplication)getApplication());
 
                     task.execute(targetIP);
-                    startActivity(intent);
+                    // startActivity(intent);
                 }
             });
         }
