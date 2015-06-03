@@ -88,7 +88,7 @@ public class DeviceListActivity extends ActionBarActivity {
             //final ArrayList<DeviceInfo> deviceList = deviceList_debug;
             for (int i = 0; i < deviceList.size(); i++) {
                 HashMap<String, Object> map = new HashMap<String, Object>();
-                if (!deviceList.get(i).deviceName.equals(app.getMyDeviceName())) {
+                if (!deviceList.get(i).ipAddress.equals(app.getMyAddress())) {
                     map.put("device_name", deviceList.get(i).deviceName);
                     map.put("device_ip", deviceList.get(i).ipAddress);
                     map.put("device_status", "available");
@@ -97,7 +97,7 @@ public class DeviceListActivity extends ActionBarActivity {
 //                else
 //                        map.put()
                     displayContent.add(map);
-                    Log.i(TAG, "on create decive list index: " + i);
+                    Log.i(TAG, "on create decive list : " + i);
                 }
             }
             listView = new ListView(this);
@@ -174,7 +174,7 @@ public class DeviceListActivity extends ActionBarActivity {
                 finish();
                 return true;
             case R.id.action_settings:
-                Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
