@@ -44,10 +44,11 @@ public class ConfirmActivity extends ActionBarActivity {
 
         //get data from CustomPhotoGalleryActivity
         //get selected photos
-        //Intent intent = getIntent();
+        Intent intent = getIntent();
         //String[] selectedPhotoPaths;
-        app = (PhotoSharingApplication) getApplication();
-        selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getSelectedPhotoPathsLength()]);
+        //app = (PhotoSharingApplication) getApplication();
+        selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        //selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getSelectedPhotoPathsLength()]);
         Log.e(TAG, "LENGTH:" + selectedPhotoPaths.length);
 
         int i = 0;
@@ -84,7 +85,7 @@ public class ConfirmActivity extends ActionBarActivity {
                 if (isPublic){
                     Intent intent = new Intent(ConfirmActivity.this, FinishActivity.class);
                     intent.putExtra("isPublic", isPublic);
-                    //intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
+                    intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
                     startActivity(intent);
                 }
                 else {
@@ -95,7 +96,7 @@ public class ConfirmActivity extends ActionBarActivity {
                         Log.e(TAG, "passcode:"+pwd);
                         Intent intent = new Intent(ConfirmActivity.this, FinishActivity.class);
                         intent.putExtra("isPublic", isPublic);
-                        //intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
+                        intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
                         intent.putExtra("passcode", pwd);
                         startActivity(intent);
                     }

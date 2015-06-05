@@ -1,5 +1,6 @@
 package com.example.photosharing;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
@@ -29,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.Key;
 import java.util.ArrayList;
 
 
@@ -37,6 +39,8 @@ public class MenuActivity extends ActionBarActivity {
     private Button btnGetPhotos;
     private Button btnSharePhotos;
     public static boolean wifiDirectConnected = false;
+
+    private Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +48,7 @@ public class MenuActivity extends ActionBarActivity {
         btnGetPhotos = (Button) this.findViewById(R.id.btnGetPhotos);
         btnSharePhotos = (Button) this.findViewById(R.id.btnSharePhotos);
         btnFindDevices = (Button) this.findViewById(R.id.btnFindDevices);
+        intent = new Intent(this, DeviceListActivity.class);
         btnGetPhotos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,26 +61,39 @@ public class MenuActivity extends ActionBarActivity {
                 String oAddress = ((PhotoSharingApplication)getApplication()).getOwnerAddress();
                 String mAddress = ((PhotoSharingApplication)getApplication()).getMyAddress();
                 if(!oAddress.equals(mAddress)) {
-                    RequestDeviceListTask task = new RequestDeviceListTask((PhotoSharingApplication)getApplication());
+                    RequestDeviceListTask task = new RequestDeviceListTask((PhotoSharingApplication)getApplication(), getApplicationContext());
                     // String oAddress = ((PhotoSharingApplication) getApplication()).getOwnerAddress();
                     Log.i("Request Deivce List", "Start to request device list from " + oAddress);
                     task.execute(oAddress);
                 }
+                else {
+                    RegisterNFD task = new RegisterNFD((PhotoSharingApplication)getApplication());
+                    Log.i("Menu Activity", "Register on NFD");
+                    ArrayList<DeviceInfo> deviceInfos = ((PhotoSharingApplication)getApplication()).getDeviceList();
+                    Log.i("Menu Activity", "The device list " + deviceInfos.toString());
+                    task.execute(deviceInfos);
 
-                Intent intent = new Intent(MenuActivity.this, DeviceListActivity.class);
-                ArrayList<DeviceInfo> deviceInfos = ((PhotoSharingApplication)getApplication()).getDeviceList();
-                intent.putParcelableArrayListExtra("devices", deviceInfos);
-                //intent.putExtra("devices", devices);
+                    // Intent intent = new Intent(MenuActivity.this, DeviceListActivity.class);
+                    // ArrayList<DeviceInfo> deviceInfos = ((PhotoSharingApplication)getApplication()).getDeviceList();
+                    intent.putParcelableArrayListExtra("devices", deviceInfos);
 
-                // Register the routes
-                // ArrayList<String> ips = new ArrayList<String>();
-                // for(DeviceInfo info : deviceInfos) {
-                    // ips.add(info.ipAddress);
-                // }
-                // RegisterNFD rTask = new RegisterNFD();
-                // rTask.execute(ips);
+                    startActivity(intent);
+                }
 
-                startActivity(intent);
+//                Intent intent = new Intent(MenuActivity.this, DeviceListActivity.class);
+//                ArrayList<DeviceInfo> deviceInfos = ((PhotoSharingApplication)getApplication()).getDeviceList();
+//                intent.putParcelableArrayListExtra("devices", deviceInfos);
+//                //intent.putExtra("devices", devices);
+//
+//                // Register the routes
+//                // ArrayList<String> ips = new ArrayList<String>();
+//                // for(DeviceInfo info : deviceInfos) {
+//                    // ips.add(info.ipAddress);
+//                // }
+//                // RegisterNFD rTask = new RegisterNFD();
+//                // rTask.execute(ips);
+//
+//                startActivity(intent);
             }
         });
         btnSharePhotos.setOnClickListener(new View.OnClickListener() {
@@ -127,7 +145,7 @@ public class MenuActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        wifiDirectConnected = true;
+        //wifiDirectConnected = true; // for test purpose, enable the two buttons on main menu page
         if (wifiDirectConnected){
             btnGetPhotos.setEnabled(true);
             btnGetPhotos.setBackground(getResources().getDrawable(R.drawable.btnviewothersenable));
@@ -152,14 +170,17 @@ public class MenuActivity extends ActionBarActivity {
         private ArrayList<DeviceInfo> deviceInfos = new ArrayList<>();
         private boolean shouldStop = false;
         private PhotoSharingApplication app;
-        public RequestDeviceListTask(PhotoSharingApplication application) {
+        private Context context;
+        public RequestDeviceListTask(PhotoSharingApplication application, Context context) {
             this.app = application;
+            this.context = context;
         }
         @Override
         protected ArrayList<DeviceInfo> doInBackground(String... params) {
 
             try {
-                KeyChain keyChain = buildTestKeyChain();
+                // KeyChain keyChain = buildTestKeyChain();
+                KeyChain keyChain = app.keyChain;
                 mFace = new Face("localhost");
                 mFace.setCommandSigningInfo(keyChain, keyChain.getDefaultCertificateName());
 
@@ -232,8 +253,12 @@ public class MenuActivity extends ActionBarActivity {
             if(deviceInfos != null) {
                 // PhotoSharingApplication application = (PhotoSharingApplication) getApplication();
                 for (DeviceInfo info : deviceInfos) {
-                    app.addDevice(info);
+                    app.addDevice(info.ipAddress, info.deviceName);
                 }
+
+                intent.putParcelableArrayListExtra("devices", deviceInfos);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
 
                 RegisterNFD task = new RegisterNFD(app);
                 task.execute(deviceInfos);
@@ -248,15 +273,17 @@ public class MenuActivity extends ActionBarActivity {
         private boolean shouldStop = false;
         private Face mFace;
         private PhotoSharingApplication app;
+        private Context context;
 
         public RegisterNFD(PhotoSharingApplication app) {
             this.app = app;
+            this.context = context;
         }
         @Override
         protected Void doInBackground(ArrayList<DeviceInfo>... params) {
 
             try {
-                KeyChain keyChain = buildTestKeyChain();
+                // KeyChain keyChain = buildTestKeyChain();
 
                 if(params.length < 1) {
                     Log.e(RegisterNFD.TAG, "No device list");
@@ -266,6 +293,8 @@ public class MenuActivity extends ActionBarActivity {
                 ArrayList<DeviceInfo> list = params[0];
                 Nfdc ndfc = new Nfdc();
                 for(DeviceInfo info : list) {
+                    if(info.ipAddress.equals(app.getMyAddress()))
+                        continue;
                     int faceID = ndfc.faceCreate("udp:/" + info.ipAddress);
                     ndfc.ribRegisterPrefix(new Name(info.ipAddress), faceID, 10, true, false);
                 }

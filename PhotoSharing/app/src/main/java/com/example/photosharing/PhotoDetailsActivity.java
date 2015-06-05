@@ -8,14 +8,20 @@ import android.graphics.Bitmap;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class PhotoDetailsActivity extends ActionBarActivity {
+    private String TAG = "PhotoDetailsActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +29,7 @@ public class PhotoDetailsActivity extends ActionBarActivity {
         setContentView(R.layout.activity_photo_details);
 
         String title = getIntent().getStringExtra("title");
-        Bitmap bitmap = getIntent().getParcelableExtra("image");
+        final Bitmap bitmap = getIntent().getParcelableExtra("image");
 
         TextView titleTextView = (TextView) findViewById(R.id.title);
         titleTextView.setText(title);
@@ -43,12 +49,24 @@ public class PhotoDetailsActivity extends ActionBarActivity {
                         //do your work here
                         //needs to be updated
                         dialog.dismiss();
+                        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date(System.currentTimeMillis()));
+                        Bitmap combination = bitmap;//get my bitmap!
+                        //save in gallery
+                        String url = MediaStore.Images.Media.insertImage(PhotoDetailsActivity.this.getContentResolver(), bitmap,"test_"+ timeStamp + ".jpg",timeStamp.toString());
 //                        ContentValues values = new ContentValues();
+//                        values.put(MediaStore.Images.Media.TITLE, title);
+//                        values.put(MediaStore.Images.Media.DESCRIPTION, description);
 //                        values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
 //                        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-//                        //needs to be updated
-//                        values.put(MediaStore.MediaColumns.DATA, filePath);
-//                        context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+//                        values.put(MediaStore.MediaColumns.DATA, filepath);
+                        if (url != null){
+                            Toast.makeText(PhotoDetailsActivity.this, "Image saved.", Toast.LENGTH_SHORT).show();
+                            Log.i(TAG, "Image saved");
+                        }
+                        else {
+                            Toast.makeText(PhotoDetailsActivity.this, "Failed.", Toast.LENGTH_SHORT).show();
+                            Log.i(TAG, "save failed");
+                        }
                     }
                 });
                 alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {

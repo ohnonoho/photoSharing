@@ -3,6 +3,7 @@ package com.example.photosharing;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.Button;
 
 
 public class FinishActivity extends ActionBarActivity {
+    private String TAG = "FinishActivity";
     private Button btnMenu;
 
     private PhotoSharingApplication app;
@@ -24,11 +26,12 @@ public class FinishActivity extends ActionBarActivity {
         boolean isPublic = intent.getBooleanExtra("isPublic", true);
         String passcode = intent.getStringExtra("passcode");
         app = (PhotoSharingApplication) getApplication();
-        // String [] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
+        String [] selectedPhotoPaths = intent.getStringArrayExtra("selectedPhotoPaths");
         // String[] selectedPhotoPaths = (String[])app.getSelectedPhotoPaths().toArray();
-        String[] selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getDeviceListLength()]);
+        //String[] selectedPhotoPaths = app.getSelectedPhotoPaths().toArray(new String[app.getDeviceListLength()]);
         for (int i = 0 ; i < selectedPhotoPaths.length ; i++){
             app.addSelectedPhoto(selectedPhotoPaths[i]);
+            Log.i(TAG, "selected photo " + i + ": " + selectedPhotoPaths[i]);
         }
         //do something on NFD !!!!!
         //update /ip/info{

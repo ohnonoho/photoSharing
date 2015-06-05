@@ -80,7 +80,7 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
             imagecursor.moveToPosition(i);
             arrPath[i] = imagecursor.getString(imagecursor.getColumnIndex(MediaStore.Images.Media.DATA));
             BitmapFactory.Options option = new BitmapFactory.Options();
-            option.inSampleSize = 4;
+            option.inSampleSize = 8;
             Bitmap image = BitmapFactory.decodeFile(arrPath[i], option);
             imageItems.add(new ImageItem(image, "Image#" + i));
         }
@@ -127,13 +127,15 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
             case R.id.share:
                 Log.i("Share", "" + numTotalPhotos);
                 ArrayList<String> selectedPhotoPaths = new ArrayList<String>();
+                //String[] selectedPhotoPaths = new String[];
                 int count = 0;
                 for (int i = 0; i < numTotalPhotos; i++) {
                     Log.i("Check", "" + i + " : " + isChecked[i]);
                     if (isChecked[i]) {
                         count++;
-                        // selectedPhotoPaths.add(arrPath[i]);// = selectImages + arrPath[i] + "|";
-                        app.addSelectedPhoto(arrPath[i]);
+                        selectedPhotoPaths.add( arrPath[i]);
+                        //selectedPhotoPaths.add(arrPath[i]);// = selectImages + arrPath[i] + "|";
+                        //app.addSelectedPhoto(arrPath[i]);
                         Log.e(TAG, arrPath[i]);
                     }
                 }
@@ -143,7 +145,9 @@ public class CustomPhotoGalleryActivity extends ActionBarActivity {
                 }
                 else {
                     //Log.d("SelectedImages", selectedPhotoPaths);
-                    intent.putExtra("selectedPhotoPaths", app.getSelectedPhotoPaths().toArray(new String[app.getSelectedPhotoPathsLength()]));
+                    //intent.putExtra("selectedPhotoPaths", app.getSelectedPhotoPaths().toArray(new String[app.getSelectedPhotoPathsLength()]));
+                    //intent.putExtra("selectedPhotoPaths", selectedPhotoPaths.toArray(new String[selectedPhotoPaths.size()]));
+                    intent.putExtra("selectedPhotoPaths", selectedPhotoPaths.toArray(new String[selectedPhotoPaths.size()]));
                     intent.setClass(CustomPhotoGalleryActivity.this, ConfirmActivity.class);
                     //Log.e(TAG, "send intent to finishActivity");
                     startActivity(intent);

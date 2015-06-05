@@ -2,6 +2,12 @@ package com.example.photosharing;
 
 import android.app.Application;
 
+import net.named_data.jndn.Name;
+import net.named_data.jndn.security.*;
+import net.named_data.jndn.security.identity.IdentityManager;
+import net.named_data.jndn.security.identity.MemoryIdentityStorage;
+import net.named_data.jndn.security.identity.MemoryPrivateKeyStorage;
+
 import java.util.ArrayList;
 
 /**
@@ -12,6 +18,8 @@ public class PhotoSharingApplication extends Application {
     private ArrayList<DeviceInfo> deviceList;
     private String myAddress, myDeviceName, ownerAddress, ownerName;
     private ArrayList<String> selectedPhotoPaths;
+
+    public static KeyChain keyChain = buildTestKeyChain();
 
     @Override
     public void onCreate() {
@@ -99,5 +107,23 @@ public class PhotoSharingApplication extends Application {
     }
     public int getSelectedPhotoPathsLength(){
         return selectedPhotoPaths.size();
+    }
+
+    public static KeyChain buildTestKeyChain() {
+        MemoryIdentityStorage identityStorage = new MemoryIdentityStorage();
+        MemoryPrivateKeyStorage privateKeyStorage = new MemoryPrivateKeyStorage();
+        IdentityManager identityManager = new IdentityManager(identityStorage, privateKeyStorage);
+        net.named_data.jndn.security.KeyChain keyChain = new net.named_data.jndn.security.KeyChain(identityManager);
+        try {
+            keyChain.getDefaultCertificateName();
+        } catch (net.named_data.jndn.security.SecurityException e) {
+            try {
+                keyChain.createIdentity(new Name("/test/identity"));
+                keyChain.getIdentityManager().setDefaultIdentity(new Name("/test/identity"));
+            } catch(net.named_data.jndn.security.SecurityException ee) {
+                e.printStackTrace();
+            }
+        }
+        return keyChain;
     }
 }

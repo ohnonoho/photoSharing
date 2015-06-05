@@ -1,5 +1,6 @@
 package com.example.photosharing;
 
+import android.app.Activity;
 import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,6 +67,7 @@ import org.json.JSONObject;
  */
 public class ProducerActivityFragment extends ListFragment implements PeerListListener{
 
+    private String TAG = "ProducerActivityFragment";
     private List<WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
     private WifiP2pDevice device = null;
     private View mView = null;
@@ -73,12 +76,24 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     HashMap<String, String> prefixMap = new HashMap<>();
     HashMap<String, String> dataMap = new HashMap<>();
 
+    //private ProducerActivity activity;
+
     public ProducerActivityFragment() {
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        Log.e(TAG, "onAttach");
+        //this.activity = (ProducerActivity)activity;
+        //ArrayList<HashMap<String, Object>> a = ((ProducerActivity)getActivity()).getDisplayContent();
+        //Log.e(TAG, "display content. size:" + ((ProducerActivity)getActivity()).getDisplayContent().size());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.e(TAG, "onCreateView");
         mView = inflater.inflate(R.layout.fragment_producer, container, false);
 
         this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.list_item, peers));
@@ -153,6 +168,33 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         Log.d(ProducerActivity.TAG, peerList.toString());
 
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
+
+        ((ProducerActivity)getActivity()).clearDisplayContent();
+        ((ProducerActivity)getActivity()).cleerPeers();
+        //this.activity.displayContent.clear();
+        ArrayList<WifiP2pDevice> devList = new ArrayList<WifiP2pDevice>();
+        devList.addAll(peerList.getDeviceList());
+        for (int i = 0 ; i < devList.size() ; i++){
+            //updateDisplayContent(devList.get(i), false);
+            boolean isOwner = false;
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            WifiP2pDevice device = devList.get(i);
+            if (isOwner)
+                map.put("device_name", device.deviceName + " (GroupOwner)");
+            else
+                map.put("device_name", device.deviceName);
+            map.put("device_ip", device.deviceAddress);
+            map.put("device_status", getDeviceStatus(device.status));
+            //(ProducerActivity getActivity()).addDisplayContent();
+            ((ProducerActivity)getActivity()).addDisplayContent(map);
+            ((ProducerActivity)getActivity()).addPeers(device);
+            //this.activity.displayContent.add(map);
+            Log.e(TAG, "displaycontent + " + i);
+        }
+        Log.e(TAG, "notify data changed");
+
+        //this.activity.adapter.notifyDataSetChanged();
+        ((ProducerActivity)getActivity()).notifyDataSetChanged();
         if (peers.size() == 0) {
             Log.d(ProducerActivity.TAG, "No devices found");
             return;
@@ -162,6 +204,11 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
     public void clearPeers() {
         peers.clear();
         ((WiFiPeerListAdapter)getListAdapter()).notifyDataSetChanged();
+        ((ProducerActivity)getActivity()).clearDisplayContent();
+        ((ProducerActivity)getActivity()).notifyDataSetChanged();
+        ((ProducerActivity)getActivity()).cleerPeers();
+//        activity.displayContent.clear();
+//        activity.adapter.notifyDataSetChanged();
     }
 
     public WifiP2pDevice getDevice() {
@@ -230,6 +277,14 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
 
                 top.setText("Name: " + device.deviceName + ", Address: " + device.deviceAddress);
                 bottom.setText(getDeviceStatus(device.status));
+
+
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("device_name", device.deviceName);
+                map.put("device_ip", device.deviceAddress);
+//                activity.displayContent.add(map);
+//                activity.adapter.notifyDataSetChanged();
+
             }
             return v;
         }
@@ -241,6 +296,8 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         top.setText("Device: " + device.deviceName + ", Address: " + device.deviceAddress);
         TextView bottom = (TextView) mView.findViewById(R.id.producer_status);
         bottom.setText("Status: " + getDeviceStatus(device.status));
+
+
     }
 
     public void updateGroupOwner(boolean isOwner, String oAddress) {
@@ -250,6 +307,7 @@ public class ProducerActivityFragment extends ListFragment implements PeerListLi
         groupOwnerAddress.setText("Owner Address: " + oAddress);
         TextView ownerStatus = (TextView) mView.findViewById(R.id.owner_status);
         ownerStatus.setText("Owner Status: " + isOwner);
+
     }
 
     public void updateMyAddress(String addr) {
