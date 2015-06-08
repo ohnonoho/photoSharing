@@ -122,7 +122,18 @@ public class ProducerService extends IntentService {
                                 // Construct the JSON object
                                 JSONObject json = new JSONObject();
                                 json.put("isPublic", isPublic);
-                                json.put("passcode", passcode);
+
+                                String pwd = "No";
+                                if (!isPublic){
+                                    try {
+                                        pwd = Encryption.encrypt("HelloWorld", passcode);
+                                    }
+                                    catch (Exception e){
+                                        Log.i(TAG, e.toString());
+                                    }
+                                }
+
+                                json.put("passcode", pwd);
                                 // ArrayList<String> list = new ArrayList<String>();
                                 // list.add("filename1");
                                 // list.add("filename2");

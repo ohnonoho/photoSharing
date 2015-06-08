@@ -62,6 +62,7 @@ public class BrowsePhotosActivity extends ActionBarActivity {
     String deviceName = "";
     boolean isPublic = true;
     String passcode = "";
+    String enteredPasscode = "";
     String targetPhotoPrefix = "";
     String targetIP = "";
 
@@ -120,12 +121,21 @@ public class BrowsePhotosActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     et.clearFocus();
-                    if( !passcode.equals( et.getText().toString() )){
+                    enteredPasscode = et.getText().toString();
+                    String attempt = "";
+                    try{
+                        attempt = Encryption.encrypt("HelloWorld", enteredPasscode);
+                    }
+                    catch (Exception e){
+                        Log.i(TAG, e.toString());
+                    }
+                    if( !passcode.equals( attempt )){
                         //showToast
                         Toast.makeText(getApplicationContext(), "Incorrect passcode", Toast.LENGTH_SHORT).show();
                         dialog.show();
                     }else{
-                        targetPhotoPrefix = deviceName + "/" + passcode;
+                        targetPhotoPrefix = deviceName + "/" + enteredPasscode;
+                        Log.i(TAG, "targetPhotoPrefix:" + targetPhotoPrefix);
                         dialog.dismiss();
                         displayContent();
                     }
