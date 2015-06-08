@@ -12,19 +12,19 @@ public class Encryption {
     public static String encrypt(String plainText, String encryptionKey) throws Exception {
         encryptionKey = encryptionKeyPadding(encryptionKey);
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes(), "AES");
-        cipher.init(Cipher.ENCRYPT_MODE, key,new IvParameterSpec(IV.getBytes()));
-        String ret = new String(cipher.doFinal(plainText.getBytes()));
+        SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("US-ASCII"), "AES");
+        cipher.init(Cipher.ENCRYPT_MODE, key,new IvParameterSpec(IV.getBytes("US-ASCII")));
+        String ret = new String(cipher.doFinal(plainText.getBytes("US-ASCII")));
         return ret;
     }
 
     public static String decrypt(String cipherText, String encryptionKey) throws Exception{
         encryptionKey = encryptionKeyPadding(encryptionKey);
-        byte[] cipherTextByte = cipherText.getBytes();
+        byte[] cipherTextByte = cipherText.getBytes("US-ASCII");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes(), "AES");
-        cipher.init(Cipher.DECRYPT_MODE, key,new IvParameterSpec(IV.getBytes()));
-        return new String(cipher.doFinal(cipherTextByte));
+        SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("US-ASCII"), "AES");
+        cipher.init(Cipher.DECRYPT_MODE, key,new IvParameterSpec(IV.getBytes("US-ASCII")));
+        return new String(cipher.doFinal(cipherTextByte), "US-ASCII");
     }
     private static String encryptionKeyPadding(String encryptionKey){
         String ret = encryptionKey;

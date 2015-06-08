@@ -211,6 +211,7 @@ public class ProducerService extends IntentService {
 
                             for (int i = 0; i < cnt; i++) {
                                 prefixData.add(content.substring(i * fixLength, Math.min((i + 1) * fixLength, content.length())));
+                                Log.i(TAG, "i: " + prefixData.get(i).length() );
                             }
 
                             if (seqNo == 1) {
