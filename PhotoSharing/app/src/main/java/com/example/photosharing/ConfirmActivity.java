@@ -96,6 +96,7 @@ public class ConfirmActivity extends ActionBarActivity {
                         Log.e(TAG, "passcode:"+pwd);
                         Intent intent = new Intent(ConfirmActivity.this, FinishActivity.class);
                         intent.putExtra("isPublic", isPublic);
+                        Log.i(TAG, "BEFORE SEND TO FINISH:" + isPublic);
                         intent.putExtra("selectedPhotoPaths", selectedPhotoPaths);
                         intent.putExtra("passcode", pwd);
                         startActivity(intent);

@@ -33,6 +33,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 /**
  * Created by peiyang on 15/5/28.
  */
@@ -75,7 +79,7 @@ public class ProducerService extends IntentService {
             Log.i("Produce Serivce", "Start Produce Service");
 
             isPublic = intent.getBooleanExtra("isPublic", true);
-            Log.i("Produce Serive", "" + isPublic);
+            Log.i("Produce Serive", "RECEIVED ISPUBLIC:" + isPublic);
             filePaths = intent.getStringArrayListExtra("filePath");
             for(String str : filePaths) {
                 Log.i("Produce Service", str);
@@ -122,7 +126,22 @@ public class ProducerService extends IntentService {
                                 // Construct the JSON object
                                 JSONObject json = new JSONObject();
                                 json.put("isPublic", isPublic);
-                                json.put("passcode", passcode);
+
+                                String encryption = "NoEncryption";
+                                Log.i(TAG, "BEFORE ENCRYPTION: " + isPublic);
+                                if (!isPublic){
+                                    try{
+
+                                        encryption = encrypt("MyLittleSecret", passcode );
+                                        Log.i(TAG, "encrypted: "+ encryption);
+                                    }
+                                    catch (Exception e){
+                                        Log.i(TAG, e.toString());
+                                    }
+                                }
+                                json.put("passcode", encryption);
+
+
                                 // ArrayList<String> list = new ArrayList<String>();
                                 // list.add("filename1");
                                 // list.add("filename2");
@@ -185,8 +204,16 @@ public class ProducerService extends IntentService {
                             byte[] bitmapdata = stream.toByteArray();
                             String content = Base64.encodeToString(bitmapdata, Base64.DEFAULT);
 
-                            // Split the data
-                            int fixLength = 8000;
+                            if (!isPublic){
+                                try {
+                                    content = encrypt(content, passcode);
+                                }
+                                catch (Exception e){
+                                    Log.i(TAG, e.toString());
+                                }
+                            }
+
+                            int fixLength = 7000;
                             int cnt = (content.length() / fixLength) + 1;
 
                             for (int i = 0; i < cnt; i++) {
@@ -199,7 +226,10 @@ public class ProducerService extends IntentService {
                                 data.setContent(new Blob(prefixData.get(seqNo - 2)));
                             }
                             mFace.putData(data);
-                            Log.i(ProducerService.TAG, "Send out the data " + interest.getName().toUri());
+                            //Log.i(ProducerService.TAG, "Send out the data " + interest.getName().toUri());
+
+
+
                         }
 
                     } catch (EncodingException e) {
@@ -240,4 +270,20 @@ public class ProducerService extends IntentService {
         }
         return keyChain;
     }
+
+    //excryption functions
+    public static String encrypt(String plainText, String encryptionKey) throws Exception {
+        String IV = "AAAAAAAAAAAAAAAA";
+        String paddedPasscode = encryptionKey;
+        for (int i = encryptionKey.length() ; i < 16 ; i++){
+            paddedPasscode = paddedPasscode + 'A';
+        }
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeySpec key = new SecretKeySpec(paddedPasscode.getBytes("UTF-8"), "AES");
+        cipher.init(Cipher.ENCRYPT_MODE, key,new IvParameterSpec(IV.getBytes("UTF-8")));
+        byte[] result = cipher.doFinal(plainText.getBytes("UTF-8"));
+        String s = new String(result);
+        return s;
+    }
+
 }

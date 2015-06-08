@@ -52,6 +52,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 
 public class BrowsePhotosActivity extends ActionBarActivity {
     private GridView gridView;
@@ -62,6 +66,7 @@ public class BrowsePhotosActivity extends ActionBarActivity {
     String deviceName = "";
     boolean isPublic = true;
     String passcode = "";
+    String enteredPasscode = "";
     String targetPhotoPrefix = "";
     String targetIP = "";
 
@@ -93,6 +98,7 @@ public class BrowsePhotosActivity extends ActionBarActivity {
 
                 isPublic = info.getBoolean("isPublic");
                 passcode = info.getString("passcode");
+
             }
         } catch (JSONException e) {
             Log.i("On Create", e.toString());
@@ -120,12 +126,21 @@ public class BrowsePhotosActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     et.clearFocus();
-                    if( !passcode.equals( et.getText().toString() )){
+                    enteredPasscode = et.getText().toString();
+                    String encryptedEnteredPasscode = "";
+                    try {
+                        encryptedEnteredPasscode = encrypt("MyLittleSecret", enteredPasscode);
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                    if( !passcode.equals(encryptedEnteredPasscode)){
                         //showToast
                         Toast.makeText(getApplicationContext(), "Incorrect passcode", Toast.LENGTH_SHORT).show();
                         dialog.show();
                     }else{
-                        targetPhotoPrefix = deviceName + "/" + passcode;
+                        targetPhotoPrefix = deviceName + "/" + enteredPasscode;
                         dialog.dismiss();
                         displayContent();
                     }
@@ -325,7 +340,7 @@ public class BrowsePhotosActivity extends ActionBarActivity {
                         requestName = new Name(targetIP + "/public/" + filename);
                     }
                     else {
-                        requestName = new Name(targetIP + "/" + passcode + "/" + filename);
+                        requestName = new Name(targetIP + "/" + enteredPasscode + "/" + filename);
                     }
 
                     Name firstRequest = new Name(requestName);
@@ -406,7 +421,15 @@ public class BrowsePhotosActivity extends ActionBarActivity {
                     for(int i = 2; i < 2+seqNumber; i++) {
                         sb.append(results.get(i));
                     }
-                    bitmapData = Base64.decode(sb.toString(), Base64.DEFAULT);
+                    String bitmapString = "";
+                    try {
+                        bitmapString = decrypt(sb.toString(), enteredPasscode);
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    bitmapData = Base64.decode(bitmapString, Base64.DEFAULT);
+
                     Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
                     ImageItem imageItem = new ImageItem(bitmap, path);
                     images.add(imageItem);
@@ -472,4 +495,34 @@ public class BrowsePhotosActivity extends ActionBarActivity {
         }
         return keyChain;
     }
+
+    //excryption functions
+    public static String encrypt(String plainText, String encryptionKey) throws Exception {
+        String IV = "AAAAAAAAAAAAAAAA";
+        String paddedPasscode = encryptionKey;
+        for (int i = encryptionKey.length() ; i < 16 ; i++){
+            paddedPasscode = paddedPasscode + 'A';
+        }
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeySpec key = new SecretKeySpec(paddedPasscode.getBytes("UTF-8"), "AES");
+        cipher.init(Cipher.ENCRYPT_MODE, key,new IvParameterSpec(IV.getBytes("UTF-8")));
+        byte[] result = cipher.doFinal(plainText.getBytes("UTF-8"));
+        String s = new String(result);
+        return s;
+    }
+
+    public static String decrypt(String cipherText, String encryptionKey) throws Exception{
+        String IV = "AAAAAAAAAAAAAAAA";
+        String paddedPasscode = encryptionKey;
+        for (int i = encryptionKey.length() ; i < 16 ; i++){
+            paddedPasscode = paddedPasscode + 'A';
+        }
+
+        byte [] cipherTextBytes = cipherText.getBytes("UTF-8");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeySpec key = new SecretKeySpec(paddedPasscode.getBytes("UTF-8"), "AES");
+        cipher.init(Cipher.DECRYPT_MODE, key,new IvParameterSpec(IV.getBytes("UTF-8")));
+        return new String(cipher.doFinal(cipherTextBytes),"UTF-8");
+    }
+
 }

@@ -39,6 +39,7 @@ public class FinishActivity extends ActionBarActivity {
 
         Intent prodIntent = new Intent(this, ProducerService.class);
 
+        Log.i(TAG, "BEFORE SEND TO SERVICE:" + isPublic);
         prodIntent.putExtra("isPublic", isPublic);
         prodIntent.putStringArrayListExtra("filePath", app.getSelectedPhotoPaths());
         prodIntent.putExtra("passcode", passcode);
