@@ -416,7 +416,17 @@ public class BrowsePhotosActivity extends ActionBarActivity {
                     for(int i = 2; i < 2+seqNumber; i++) {
                         sb.append(results.get(i));
                     }
-                    bitmapData = Base64.decode(sb.toString(), Base64.DEFAULT);
+                    String decodedImgString = sb.toString();
+                    if (!isPublic){
+                        try {
+                            decodedImgString = Encryption.decrypt(sb.toString(), enteredPasscode);
+                        }
+                        catch (Exception e){
+                            Log.i(TAG, e.toString());
+                        }
+                    }
+
+                    bitmapData = Base64.decode(decodedImgString, Base64.DEFAULT);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
                     ImageItem imageItem = new ImageItem(bitmap, path);
                     images.add(imageItem);
