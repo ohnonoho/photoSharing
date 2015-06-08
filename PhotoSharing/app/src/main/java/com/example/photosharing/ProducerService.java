@@ -211,13 +211,16 @@ public class ProducerService extends IntentService {
 
                             for (int i = 0; i < cnt; i++) {
                                 prefixData.add(content.substring(i * fixLength, Math.min((i + 1) * fixLength, content.length())));
-                                Log.i(TAG, "i: " + prefixData.get(i).length() );
+                                Log.i(TAG, "i: " + prefixData.get(i).length());
                             }
 
                             if (seqNo == 1) {
                                 data.setContent(new Blob("" + prefixData.size()));
                             } else {
-                                data.setContent(new Blob(prefixData.get(seqNo - 2)));
+                                byte[] bString = prefixData.get(seqNo - 2).getBytes();
+                                Log.i(ProducerService.TAG, "Size :" + bString.length);
+                                // data.setContent(new Blob(prefixData.get(seqNo - 2)));
+                                data.setContent(new Blob(bString));
                             }
                             mFace.putData(data);
                             Log.i(ProducerService.TAG, "Send out the data " + interest.getName().toUri());
