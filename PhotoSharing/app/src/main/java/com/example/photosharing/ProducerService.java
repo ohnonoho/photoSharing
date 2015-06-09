@@ -194,16 +194,17 @@ public class ProducerService extends IntentService {
                             ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                             byte[] bitmapdata = stream.toByteArray();
-                            String content = Base64.encodeToString(bitmapdata, Base64.DEFAULT);
 
                             if (!isPublic){
                                 try{
-                                    content = Encryption.encrypt(content, passcode);
+                                    //content = Encryption.encrypt(content, passcode);
+                                    bitmapdata = Encryption.encryptByte(bitmapdata, passcode);
                                 }
                                 catch (Exception e){
                                     Log.i(TAG, e.toString());
                                 }
                             }
+                            String content = Base64.encodeToString(bitmapdata, Base64.DEFAULT);
 
                             // Split the data
                             int fixLength = 8000;
